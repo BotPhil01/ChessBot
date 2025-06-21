@@ -1,12 +1,14 @@
 #!/bin/bash
 prefix="run.sh:"
-./build.sh
+./build.sh debug
 if [[ $? -ne 0 ]]; then
-    echo "$prefix run failed: exiting"
+    echo "$prefix run failed"
+    echo "$prefix exiting"
+    exit 1
 fi
 path="./bin/Debug/ChessBot"
 echo "$prefix executing $path"
-./bin/Debug/ChessBot
+$path
 exitcode=0
 if [[ $# -eq 1 ]]; then
     if [[ $1 == "n" || $1 == "no" ]]; then

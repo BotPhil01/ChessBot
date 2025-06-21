@@ -1,5 +1,5 @@
 workspace "ChessBot"
-    configurations { "Debug", "Release" }
+    configurations { "Debug", "Release", "Tests" }
     location ".."
 
 project "ChessBot"
@@ -8,7 +8,7 @@ project "ChessBot"
     language "C++"
     targetdir "../bin/%{cfg.buildcfg}"
 
-    files { "../src/**.hpp", "../src/**.cpp" }
+    files { "../include/**.hpp", "../src/**.cpp" }
 
     filter "configurations:Debug"
     defines { "DEBUG" }
@@ -17,3 +17,9 @@ project "ChessBot"
     filter "configurations:Release"
     defines { "NDEBUG" }
     optimize "On"
+
+    filter "configurations:Tests"
+    defines { "TESTS" }
+    symbols "On"
+    files { "../tests/**.hpp", "../tests/**.cpp" }
+    removefiles { "../src/main.cpp" }
