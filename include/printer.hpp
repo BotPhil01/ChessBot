@@ -13,5 +13,6 @@ namespace n_prt {
     }
 
     void bbprint(const bitboard bb);
+    void bprint(const n_types::board b);
 }
 #endif

@@ -12,7 +12,7 @@ namespace n_bbd {
     u8 bitPopCount(bitboard bb);
     
     // array<u8, 256> const _createPopLookup();
-    constexpr bitboard shiftOne(const dir d, const bitboard bb) {
+    constexpr bitboard shiftOne(const n_types::dir d, const bitboard bb) {
         const bitboard mask = n_consts::shiftMasks[n_consts::dirIndex(d)];
         if (d < 0) {
             return bb >> -d & mask;

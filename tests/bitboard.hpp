@@ -25,7 +25,7 @@ namespace n_bb {
     };
 
     bool testPopCount() {
-        u8 sum;
+        u8 sum = 0;
         sum += n_bbd::bitPopCount(b_empty); // 0
         sum += n_bbd::bitPopCount(b_unary); // 1
         sum += n_bbd::bitPopCount(b_full); // 64
@@ -74,7 +74,7 @@ namespace n_bb {
     bool testShiftOne() {
         ret = true;
         for (int i = 0; i < n_consts::a_dirs.size(); i++) {
-            const dir d = n_consts::a_dirs[i];
+            const n_types::dir d = n_consts::a_dirs[i];
             const bitboard mask = n_consts::shiftMasks[i];
             const bitboard shifted = n_bbd::shiftOne(d, b_full);
             if (shifted != mask) {

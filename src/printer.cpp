@@ -4,6 +4,7 @@ namespace n_prt {
     void cprint(const char cVal) {
         cout << cVal << endl;
     }
+
     void bbprint(const bitboard bb) {
         u8 i = 0;
         bitboard mask = 1;
@@ -29,5 +30,9 @@ endcheck:
             return;
         }
         goto operation;
+    }
+
+    void bprint(const n_types::board b) {
+        cout << b.str() << endl;
     }
 }

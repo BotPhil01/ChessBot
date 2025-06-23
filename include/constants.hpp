@@ -5,7 +5,7 @@
 #define CONSTS_HPP
 namespace n_consts {
     // shift masks
-    constexpr u8 dirIndex(const dir d) {
+    constexpr u8 dirIndex(const n_types::dir d) {
         int i = 0;
         switch (d) {
             case n_types::e_dir::NORTHWEST:
@@ -37,7 +37,7 @@ namespace n_consts {
     const u8 u_west = dirIndex(n_types::WEST);
     const u8 u_northwest = dirIndex(n_types::NORTHWEST);
 
-    const array<s8, 8> a_dirs = {
+    const array<n_types::e_dir, 8> a_dirs = {
         n_types::e_dir::NORTH,
         n_types::e_dir::NORTHEAST,
         n_types::e_dir::EAST,

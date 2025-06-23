@@ -4,6 +4,6 @@
 #include "../include/types.hpp"
 
 int main() {
-    const bitboard full = 0xFFFFFFFFFFFFFFFF;
-    n_prt::bbprint(full);
+    const n_types::board b;
+    n_prt::bprint(b);
 }
