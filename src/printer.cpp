@@ -1,6 +1,12 @@
 #include <iostream>
 #include "../include/types.hpp"
+#include "../include/board.hpp"
+
+#pragma once
+
 namespace n_prt {
+    using namespace n_types;
+    using namespace n_brd;
     void cprint(const char cVal) {
         cout << cVal << endl;
     }
@@ -32,7 +38,11 @@ endcheck:
         goto operation;
     }
 
-    void bprint(const n_types::board b) {
+    void bprint(const board b) {
         cout << b.str() << endl;
+    }
+
+    void mprint(const cMove m) {
+        cout << m.str() << endl;
     }
 }

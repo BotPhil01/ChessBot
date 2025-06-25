@@ -1,8 +1,9 @@
 #include "types.hpp"
+#include "board.hpp"
 #include <iostream>
-#ifndef PRINTER_HPP
-#define PRINTER_HPP
+#pragma oncee
 namespace n_prt {
+    using namespace n_brd;
     void cprint(const char cVal);
     template<class Iterator>
     void iprint(const Iterator i_start, const Iterator i_end) {
@@ -13,6 +14,6 @@ namespace n_prt {
     }
 
     void bbprint(const bitboard bb);
-    void bprint(const n_types::board b);
+    void bprint(const board b);
+    void mprint(const cMove m);
 }
-#endif

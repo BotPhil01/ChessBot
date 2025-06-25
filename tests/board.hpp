@@ -1,13 +1,18 @@
 #include "../include/constants.hpp"
 #include "../include/printer.hpp"
+#include "../include/board.hpp"
 #include "bitboard.hpp"
 #include "tConsts.hpp"
 #include <sstream>
 namespace n_b {
+    using namespace n_prt;
+    using namespace n_brd;
+    using namespace n_bbd;
+    using namespace n_types;
     string msg = "";
     bool ret = true;
     bool testFen() {
-        n_types::board b;
+        board b;
         b.loadFen(n_consts::sv_fenStart);
         const string s_test = b.str();
 
@@ -38,27 +43,27 @@ namespace n_b {
     bool testPlayMove() {
         msg = "TEST PLAY MOVE ";
 
-        n_types::move m_b = {
-            .c_atk = black,
-            .p_atk = n_types::PAWN,
-            .s_atkOld = ((u64) 1 << 48),
-            .s_atkNew = n_bbd::shiftOne(n_types::SOUTH, ((u64) 1 << 48)),
-            .c_dfd = black,
-            .p_dfd = n_types::PAWN,
-            .s_dfdOld = 0,
-        };
+        cMove m_b (
+            black,
+            PAWN,
+            ((u64) 1 << 48),
+            n_bbd::shiftOne(SOUTH, ((u64) 1 << 48)),
+            black,
+            PAWN,
+            0
+        );
 
-        n_types::move m_w {
-            .c_atk = white,
-                .p_atk = n_types::e_piece::PAWN,
-                .s_atkOld = (1 << 11),
-                .s_atkNew = n_bbd::shiftOne(n_types::NORTH, (1 << 11)),
-                .c_dfd = white,
-                .p_dfd = n_types::e_piece::PAWN,
-                .s_dfdOld = 0,
-        };
+        cMove m_w (
+            white,
+                e_piece::PAWN,
+                (1 << 11),
+                n_bbd::shiftOne(NORTH, (1 << 11)),
+                white,
+                e_piece::PAWN,
+                0
+        );
 
-        n_types::board b;
+        board b;
         b.loadFen(n_consts::sv_fenStart);
         b.playMove(m_w);
         string s_test = b.str();
@@ -114,29 +119,29 @@ end:
     }
 
     bool testUnPlayMove() {
-        n_types::move m_b = {
-            .c_atk = black,
-            .p_atk = n_types::PAWN,
-            .s_atkOld = ((u64) 1 << 48),
-            .s_atkNew = n_bbd::shiftOne(n_types::SOUTH, ((u64) 1 << 48)),
-            .c_dfd = black,
-            .p_dfd = n_types::PAWN,
-            .s_dfdOld = 0,
-        };
+        cMove m_b (
+            black,
+            PAWN,
+            ((u64) 1 << 48),
+            n_bbd::shiftOne(SOUTH, ((u64) 1 << 48)),
+            black,
+            PAWN,
+            0
+        );
 
-        n_types::move m_w {
-            .c_atk = white,
-                .p_atk = n_types::e_piece::PAWN,
-                .s_atkOld = (1 << 11),
-                .s_atkNew = n_bbd::shiftOne(n_types::NORTH, (1 << 11)),
-                .c_dfd = white,
-                .p_dfd = n_types::e_piece::PAWN,
-                .s_dfdOld = 0,
-        };
-        n_types::board b;
+        cMove m_w (
+            white,
+                e_piece::PAWN,
+                (1 << 11),
+                n_bbd::shiftOne(NORTH, (1 << 11)),
+                white,
+                e_piece::PAWN,
+                0
+        );
+        board b;
         b.loadFen(n_consts::sv_fenStart);
         b.playMove(m_w);
-        b.unplayMove();
+        b.unPlayMove();
         string s_test = b.str();
 
         stringstream ss_cmp;
@@ -164,8 +169,8 @@ end:
 
         b.playMove(m_w);
         b.playMove(m_b);
-        b.unplayMove();
-        b.unplayMove();
+        b.unPlayMove();
+        b.unPlayMove();
         s_test.clear();
         s_test = b.str();
 
@@ -192,8 +197,28 @@ end:
         return ret;
     }
 
+    bool testGenMove() {
+        board b;
+        b.loadFen(sv_fenStart);
+        vector<cMove> v_moves = b.genPseudoLegalMoves();
+        msg = "TEST GEN MOVE ";
+        ret = v_moves.size() == 20;
+        eval(ret, msg);
+        if (!ret) {
+            for (cMove m : v_moves) {
+                mprint(m);
+            }
+        }
+        return true;
+    }
+    bool testGenMoveLegal() {
+        return true;
+    }
     bool tests() {
-        return testFen() && testPlayMove() && testUnPlayMove();
-
+        return testFen() &&
+            testPlayMove() &&
+            testUnPlayMove() &&
+            testGenMove() &&
+            testGenMoveLegal();
     }
 }

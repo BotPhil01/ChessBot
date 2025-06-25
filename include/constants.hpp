@@ -1,8 +1,7 @@
 #include "types.hpp"
 #include <array>
 
-#ifndef CONSTS_HPP
-#define CONSTS_HPP
+#pragma once
 namespace n_consts {
     // shift masks
     constexpr u8 dirIndex(const n_types::dir d) {
@@ -48,6 +47,16 @@ namespace n_consts {
         n_types::e_dir::NORTHWEST,
     };
 
+    const array<n_types::e_piece, 7> a_pieces = {
+        n_types::e_piece::PAWN,
+        n_types::e_piece::ROOK,
+        n_types::e_piece::BISHOP,
+        n_types::e_piece::KNIGHT,
+        n_types::e_piece::KING,
+        n_types::e_piece::QUEEN,
+        n_types::e_piece::EMPTY,
+    };
+
     const array<u64, 8> shiftMasks = {
         0xffffffffffffff00,
         0xfefefefefefefe00,
@@ -68,4 +77,3 @@ namespace n_consts {
         'p', 'r', 'b', 'n', 'k', 'q'
     };
 }
-#endif
