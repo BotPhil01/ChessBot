@@ -26,6 +26,7 @@ namespace n_brd {
     // u64 board::u_fullMoveCounter = 0;
 
     using namespace n_types;
+    using namespace n_bbd;
     board::board() = default;
     string board::_pos2string() const {
         const u8 u_bbDimension = 8;
@@ -101,7 +102,7 @@ namespace n_brd {
             for (auto it = sv_part.begin(); it != sv_part.end(); it++) {
                 const char c = *it;
                 if (isdigit(c)) {
-                    u_col += (u8) c;
+                    u_col += (u64) (c - '0');
                     continue;
                 }
 
@@ -448,7 +449,7 @@ namespace n_brd {
 
         bitboard bb_occupied =_calcOccupied();
         while (bb_oldIsolated) {
-            bitboard bb_newAtks = m_magics.lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
+            bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
             bitboard bb_newIsolated = bitIsolate(bb_newAtks);
             bb_newAtks ^= bb_newIsolated;
             while (bb_newIsolated) {
@@ -479,7 +480,7 @@ namespace n_brd {
 
         bitboard bb_occupied =_calcOccupied();
         while (bb_oldIsolated) {
-            bitboard bb_newAtks = m_magics.lookup(bb_oldIsolated, bb_occupied, BISHOP) & ~bb_friendlies;
+            bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, BISHOP) & ~bb_friendlies;
             bitboard bb_newIsolated = bitIsolate(bb_newAtks);
             bb_newAtks ^= bb_newIsolated;
             while (bb_newIsolated) {
@@ -542,7 +543,7 @@ namespace n_brd {
         const bitboard bb_occupied =_calcOccupied();
         while (bb_oldIsolated) {
             for (const piece p_mask : {BISHOP, ROOK}) {
-                bitboard bb_newAtks = m_magics.lookup(bb_oldIsolated, bb_occupied, p_mask);
+                bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, p_mask);
                 bitboard bb_newIsolated = bitIsolate(bb_newAtks) & ~bb_friendlies;
                 bb_newAtks ^= bb_newIsolated;
                 while (bb_newIsolated) {
@@ -642,7 +643,7 @@ namespace n_brd {
     }
 
     bool board::_isKingInCheck(const colour c) {
-        const vector<cMove> moves = this->genLegalMoves();
+        const vector<cMove> moves = this->genPseudoLegalMoves();
         for (const cMove m : moves) {
             if (m.p_dfd == KING && m.c_dfd == c) {
                 return true;

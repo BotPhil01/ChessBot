@@ -1,10 +1,11 @@
 #include "types.hpp"
-#include "magics.hpp"
 #include <list>
 #include <stack>
+#include <memory>
+#include <array>
+#include <vector>
 #pragma once
 namespace n_brd {
-    using namespace n_mgc;
     using namespace n_types;
     typedef struct player {
         bitboard b_pawn;
@@ -90,7 +91,7 @@ namespace n_brd {
             u8 u_halfMoveClock = 0;
             u64 u_fullMoveCounter = 1;
             stack<hisItem, list<hisItem>> s_moveHistory;
-            magics m_magics;
+            // magics m_magics;
 
             void _extractBitboardAndAlter(
                     unique_ptr<player> &p,

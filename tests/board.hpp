@@ -14,7 +14,7 @@ namespace n_b {
     bool testFen() {
         board b;
         b.loadFen(n_consts::sv_fenStart);
-        const string s_test = b.str();
+        string s_test = b.str();
 
         stringstream ss_cmp;
         ss_cmp << 
@@ -30,9 +30,31 @@ namespace n_b {
             "en passant target: none" << "\n" <<
             "half move clock: 0" << "\n" <<
             "full move clock: 1" << "\n";
-        const string s_cmp = ss_cmp.str();
-        ret = s_cmp == s_test;
+        string s_cmp = ss_cmp.str();
         msg = "TEST LOAD FEN ";
+        ret = s_cmp == s_test;
+        if (!ret) {
+            goto end;
+        }
+        b.loadFen("7K/2B2P2/Q3R2N/8/8/r2n2q1/2p2b2/k7 w - - 0 1"sv);
+        ss_cmp.str(string());
+        ss_cmp <<
+            "x x x x x x x K" << "\n" <<
+            "x x B x x P x x" << "\n" <<
+            "Q x x x R x x N" << "\n" <<
+            "x x x x x x x x" << "\n" <<
+            "x x x x x x x x" << "\n" <<
+            "r x x n x x q x" << "\n" <<
+            "x x p x x b x x" << "\n" <<
+            "k x x x x x x x" << "\n" <<
+            "side to move: white" << "\n" <<
+            "en passant target: none" << "\n" <<
+            "half move clock: 0" << "\n" <<
+            "full move clock: 1" << "\n";
+        s_cmp = ss_cmp.str();
+        s_test = b.str();
+        ret = s_cmp == s_test;
+end:
         eval(ret, msg);
         if (!ret) {
             cout << "target:\n" << s_cmp << "actual:\n" << s_test;
@@ -199,19 +221,37 @@ end:
 
     bool testGenMove() {
         board b;
-        b.loadFen(sv_fenStart);
+        string_view sv_fen = sv_fenStart;
+        b.loadFen(sv_fen);
         vector<cMove> v_moves = b.genPseudoLegalMoves();
         msg = "TEST GEN MOVE ";
         ret = v_moves.size() == 20;
-        eval(ret, msg);
+
+
         if (!ret) {
+            goto end;
+        }
+        sv_fen = "PPP5/1q6/8/PPPP4/8/8/PP6/kP6 b - - 1 1";
+        b.loadFen(sv_fen);
+        v_moves = b.genPseudoLegalMoves();
+
+        ret = v_moves.size() == 14;
+end:
+        eval(ret, msg);
             for (cMove m : v_moves) {
                 mprint(m);
             }
-        }
         return true;
     }
     bool testGenMoveLegal() {
+        string_view sv_fen = "2B4K/1P4q1/1B5k/1N2R3/8/3r1P2/8/8 w - - 0 1";
+        board b;
+        b.loadFen(sv_fen);
+        vector<cMove> v_moves = b.genLegalMoves();
+        ret = v_moves.size() == 0;
+        msg = "TEST LEGAL GEN MOVE ";
+        eval(ret, msg);
+        bprint(b);
         return true;
     }
     bool tests() {

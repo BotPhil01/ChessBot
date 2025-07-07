@@ -17,54 +17,6 @@ namespace n_bbd {
     //     return a_ret;
     // }
 
-    u8 bitPopCount(const bitboard bb) {
-        // generated with _createPopLoookup
-        const array<u8, 256> a_popLookup = {
-            0, 1, 1, 2, 1, 2, 2, 3,
-            1, 2, 2, 3, 2, 3, 3, 4,
-            1, 2, 2, 3, 2, 3, 3, 4,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            1, 2, 2, 3, 2, 3, 3, 4,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            1, 2, 2, 3, 2, 3, 3, 4,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            4, 5, 5, 6, 5, 6, 6, 7,
-            1, 2, 2, 3, 2, 3, 3, 4,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            4, 5, 5, 6, 5, 6, 6, 7,
-            2, 3, 3, 4, 3, 4, 4, 5,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            4, 5, 5, 6, 5, 6, 6, 7,
-            3, 4, 4, 5, 4, 5, 5, 6,
-            4, 5, 5, 6, 5, 6, 6, 7,
-            4, 5, 5, 6, 5, 6, 6, 7,
-            5, 6, 6, 7, 6, 7, 7, 8, 
-        };
-        u8 *p_bb = (u8 *) &bb;
-        return 
-            a_popLookup[p_bb[0]] + 
-            a_popLookup[p_bb[1]] + 
-            a_popLookup[p_bb[2]] + 
-            a_popLookup[p_bb[3]] + 
-            a_popLookup[p_bb[4]] + 
-            a_popLookup[p_bb[5]] + 
-            a_popLookup[p_bb[6]] + 
-            a_popLookup[p_bb[7]];
-    }
-
     pShiftData pShift(
             const bitboard bb,
             const n_types::colour c,
@@ -104,5 +56,15 @@ namespace n_bbd {
                 .s_eep = bb_eepShift,
                 .s_wep = bb_wepShift,
         };
+    }
+
+    u32 square2index(const square s) {
+        square s_tmp = s;
+        u32 i = 0;
+        while (s_tmp != 1) {
+            s_tmp = s_tmp >> 1;
+            i++;
+        }
+        return i;
     }
 }

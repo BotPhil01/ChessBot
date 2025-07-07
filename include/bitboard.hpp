@@ -14,9 +14,54 @@ namespace n_bbd {
         return bb & -bb;
     }
 
-    u8 bitPopCount(bitboard bb);
+    constexpr u8 bitPopCount(const bitboard bb) {
+        // generated with _createPopLoookup
+        u8 u_ret = 0;
+        const array<u8, 256> a_popLookup = {
+            0, 1, 1, 2, 1, 2, 2, 3,
+            1, 2, 2, 3, 2, 3, 3, 4,
+            1, 2, 2, 3, 2, 3, 3, 4,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            1, 2, 2, 3, 2, 3, 3, 4,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            1, 2, 2, 3, 2, 3, 3, 4,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            4, 5, 5, 6, 5, 6, 6, 7,
+            1, 2, 2, 3, 2, 3, 3, 4,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            4, 5, 5, 6, 5, 6, 6, 7,
+            2, 3, 3, 4, 3, 4, 4, 5,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            4, 5, 5, 6, 5, 6, 6, 7,
+            3, 4, 4, 5, 4, 5, 5, 6,
+            4, 5, 5, 6, 5, 6, 6, 7,
+            4, 5, 5, 6, 5, 6, 6, 7,
+            5, 6, 6, 7, 6, 7, 7, 8, 
+        };
+
+        for (u8 i = 0; i < 8; i++) {
+            u8 u_index = (bb >> (8 * i)) & 0xff;
+            u_ret += a_popLookup[u_index];
+        }
+        return u_ret;
+    }
+
     
     // array<u8, 256> const _createPopLookup();
+    
     constexpr bitboard shiftOne(const n_types::dir d, const bitboard bb) {
         const bitboard mask = n_consts::shiftMasks[n_consts::dirIndex(d)];
         if (d < 0) {
@@ -25,6 +70,12 @@ namespace n_bbd {
         return bb << d & mask;
     }
 
+    constexpr bitboard shift(const dir d, const bitboard bb, const u32 u_n) {
+        if (u_n == 0) {
+            return bb;
+        }
+        return shift(d, shiftOne(d, bb), u_n-1);
+    }
     // rotates bitboard 90 degrees 
     typedef const array<const reference_wrapper<bitboard>, 6> ptrtype;
     typedef struct pShiftData {
@@ -112,4 +163,5 @@ namespace n_bbd {
     //         const n_types::colour c,
     //         unique_ptr<ptrtype> &up_bbDfd) {
     // }
+    u32 square2index(const square s);
 }
