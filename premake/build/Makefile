@@ -85,11 +85,13 @@ GENERATED += $(OBJDIR)/bitboard.o
 GENERATED += $(OBJDIR)/board.o
 GENERATED += $(OBJDIR)/magics.o
 GENERATED += $(OBJDIR)/printer.o
+GENERATED += $(OBJDIR)/sliding.o
 GENERATED += $(OBJDIR)/types.o
 OBJECTS += $(OBJDIR)/bitboard.o
 OBJECTS += $(OBJDIR)/board.o
 OBJECTS += $(OBJDIR)/magics.o
 OBJECTS += $(OBJDIR)/printer.o
+OBJECTS += $(OBJDIR)/sliding.o
 OBJECTS += $(OBJDIR)/types.o
 
 ifeq ($(config),debug)
@@ -182,6 +184,9 @@ $(OBJDIR)/magics.o: ../../src/magics.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/printer.o: ../../src/printer.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/sliding.o: ../../src/sliding.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/types.o: ../../src/types.cpp

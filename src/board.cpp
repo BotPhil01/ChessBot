@@ -3,9 +3,9 @@
 #include "../include/bitboard.hpp"
 #include "../include/magics.hpp"
 #include "../include/board.hpp"
+#include "../include/sliding.hpp"
 #include <cctype>
 #include <functional>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <cassert>
@@ -329,10 +329,12 @@ namespace n_brd {
 
     // search enemy square for piece type
     piece board::_square2piece(const square s) {
-        player p_dfd = this->playerToWatch();
-        auto a_bbs = p_dfd.a_bitboards;
-        for (u8 i = 0; i < a_bbs.size(); i++) {
-            if (a_bbs[i] & s) return a_pieces[i];
+        for (player p_dfd : {p_white, p_black}) {
+            // player p_dfd = this->playerToWatch();
+            auto a_bbs = p_dfd.a_bitboards;
+            for (u8 i = 0; i < a_bbs.size(); i++) {
+                if (a_bbs[i] & s) return a_pieces[i];
+            }
         }
         return EMPTY;
     }
@@ -449,7 +451,9 @@ namespace n_brd {
 
         bitboard bb_occupied =_calcOccupied();
         while (bb_oldIsolated) {
-            bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
+            // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
+            bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, ROOK);
+            bb_newAtks &= ~bb_friendlies;
             bitboard bb_newIsolated = bitIsolate(bb_newAtks);
             bb_newAtks ^= bb_newIsolated;
             while (bb_newIsolated) {
@@ -480,7 +484,9 @@ namespace n_brd {
 
         bitboard bb_occupied =_calcOccupied();
         while (bb_oldIsolated) {
-            bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, BISHOP) & ~bb_friendlies;
+            // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, BISHOP) & ~bb_friendlies;
+            bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, BISHOP); 
+            bb_newAtks &= ~bb_friendlies;
             bitboard bb_newIsolated = bitIsolate(bb_newAtks);
             bb_newAtks ^= bb_newIsolated;
             while (bb_newIsolated) {
@@ -543,16 +549,20 @@ namespace n_brd {
         const bitboard bb_occupied =_calcOccupied();
         while (bb_oldIsolated) {
             for (const piece p_mask : {BISHOP, ROOK}) {
-                bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, p_mask);
-                bitboard bb_newIsolated = bitIsolate(bb_newAtks) & ~bb_friendlies;
-                bb_newAtks ^= bb_newIsolated;
+                bitboard bb_newAtks = n_sld::lookup(
+                        bb_oldIsolated,
+                        bb_occupied,
+                        p_mask);
+                bb_newAtks &= ~bb_friendlies;
+                bitboard bb_newIsolated = bitIsolate(bb_newAtks);
+                bb_newAtks &= ~bb_newIsolated;
                 while (bb_newIsolated) {
                     const piece p_dfd = _square2piece(bb_newIsolated); 
                     const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
                     const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
                     v_dst.emplace_back(
                             this->c_sideToMove,
-                            p_mask,
+                            QUEEN,
                             bb_oldIsolated,
                             bb_newIsolated,
                             c_dfd,
@@ -560,11 +570,11 @@ namespace n_brd {
                             bb_dfdOld
                             );
                     bb_newIsolated = bitIsolate(bb_newAtks);
-                    bb_newAtks ^= bb_newIsolated;
+                    bb_newAtks &= ~bb_newIsolated;
                 }
-                bb_oldIsolated = bitIsolate(bb_oldAtks);
-                bb_oldAtks &= ~bb_oldIsolated;
             }
+            bb_oldIsolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks &= ~bb_oldIsolated;
         }
     }
 
@@ -654,12 +664,19 @@ namespace n_brd {
     vector<cMove> board::genLegalMoves() {
         vector<cMove> v_ret;
         const vector<cMove> v_pseudo = this->genPseudoLegalMoves();
-
+        // if i were to play the current move
+        // could the other person take my king
+        // if no then its a legal move
+        // if yes then its ilegal (skip)
+        // src = 0x1000
+        // dst = 0x200000
         for (const cMove m : v_pseudo) {
             this->playMove(m);
-            if (!this->_isKingInCheck(!this->c_sideToMove)) {
-                v_ret.emplace_back(m);
+            if (this->_isKingInCheck(!this->c_sideToMove)) {
+                this->unPlayMove();
+                continue;
             }
+            v_ret.emplace_back(m);
             this->unPlayMove();
         }
 

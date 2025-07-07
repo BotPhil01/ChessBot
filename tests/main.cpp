@@ -3,6 +3,7 @@
 #include "board.hpp"
 #include <sys/resource.h>
 int main() {
-    n_mgc::genMagics();
+    n_bb::tests();
+    n_b::tests();
 }
 

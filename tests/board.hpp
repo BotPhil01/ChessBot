@@ -231,16 +231,16 @@ end:
         if (!ret) {
             goto end;
         }
-        sv_fen = "PPP5/1q6/8/PPPP4/8/8/PP6/kP6 b - - 1 1";
+        sv_fen = "PPP5/1q6/8/PPPP4/8/8/PP6/kPK5 b - - 1 1";
         b.loadFen(sv_fen);
         v_moves = b.genPseudoLegalMoves();
 
-        ret = v_moves.size() == 14;
+        ret = v_moves.size() == 18;
 end:
         eval(ret, msg);
-            for (cMove m : v_moves) {
-                mprint(m);
-            }
+        // for (cMove m : v_moves) {
+        //     mprint(m);
+        // }
         return true;
     }
     bool testGenMoveLegal() {
@@ -248,10 +248,19 @@ end:
         board b;
         b.loadFen(sv_fen);
         vector<cMove> v_moves = b.genLegalMoves();
-        ret = v_moves.size() == 0;
         msg = "TEST LEGAL GEN MOVE ";
+        ret = v_moves.size() == 0;
+        if (!ret) goto end;
+        sv_fen = "k7/8/8/8/4q3/2b3b1/4K1Br/1r6 w - - 0 1";
+        b.loadFen(sv_fen);
+        v_moves = b.genLegalMoves();
+        for (cMove m : v_moves) {
+            mprint(m);
+        }
+        ret = v_moves.size() == 0;
+end:
         eval(ret, msg);
-        bprint(b);
+        // bprint(b);
         return true;
     }
     bool tests() {
