@@ -3,7 +3,6 @@
 #include <iostream>
 #pragma oncee
 namespace n_prt {
-    using namespace n_brd;
     void cprint(const char cVal);
     template<class Iterator>
     void iprint(const Iterator i_start, const Iterator i_end) {
@@ -14,6 +13,6 @@ namespace n_prt {
     }
 
     void bbprint(const bitboard bb);
-    void bprint(const board b);
-    void mprint(const cMove m);
+    void bprint(const n_brd::board b);
+    void mprint(const n_types::cMove m);
 }

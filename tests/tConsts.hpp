@@ -21,5 +21,4 @@ namespace tConsts {
         }
     }
 }
-#define eval tConsts::eval
 #endif

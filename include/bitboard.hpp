@@ -76,7 +76,33 @@ namespace n_bbd {
         }
         return shift(d, shiftOne(d, bb), u_n-1);
     }
-    // rotates bitboard 90 degrees 
+
+    constexpr bitboard mirror(bitboard bb) {
+        return  (bb << 56) |
+            ((bb << 40) & 0x00ff000000000000) |
+            ((bb << 24) & 0x0000ff0000000000) |
+            ((bb << 8) & 0x000000ff00000000) |
+            ((bb >> 8) & 0x00000000ff000000) |
+            ((bb >> 24) & 0x0000000000ff0000) |
+            ((bb >> 40) & 0x000000000000ff00) |
+            ((bb >> 56) );
+    }
+
+    constexpr bitboard rotate(bitboard bb) {
+        const u64 h1 = 0x5555555555555555;
+        const u64 h2 = 0x3333333333333333;
+        const u64 h4 = 0x0F0F0F0F0F0F0F0F;
+        const u64 v1 = 0x00FF00FF00FF00FF;
+        const u64 v2 = 0x0000FFFF0000FFFF;
+        bb = ((bb >> 1) & h1) | ((bb & h1) << 1);
+        bb = ((bb >> 2) & h2) | ((bb & h2) << 2);
+        bb = ((bb >> 4) & h4) | ((bb & h4) << 4);
+        bb = ((bb >> 8) & v1) | ((bb & v1) << 8);
+        bb = ((bb >> 16) & v2) | ((bb & v2) << 16);
+        bb = (bb >> 32) | (bb << 32);
+        return bb;
+    }
+
     typedef const array<const reference_wrapper<bitboard>, 6> ptrtype;
     typedef struct pShiftData {
         square s_fwd = 0;

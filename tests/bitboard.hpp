@@ -4,7 +4,7 @@
 #include "./tConsts.hpp"
 
 namespace n_bb {
-#define  eval tConsts::eval
+    using namespace tConsts;
     bool ret = true;
     string msg = "";
     bitboard b_empty = 0x0;

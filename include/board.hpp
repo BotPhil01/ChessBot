@@ -1,4 +1,5 @@
 #include "types.hpp"
+#include <functional>
 #include <list>
 #include <stack>
 #include <memory>
@@ -6,7 +7,7 @@
 #include <vector>
 #pragma once
 namespace n_brd {
-    using namespace n_types;
+    // using namespace n_types;
     typedef struct player {
         bitboard b_pawn;
         bitboard b_rook;
@@ -14,7 +15,7 @@ namespace n_brd {
         bitboard b_knight;
         bitboard b_king;
         bitboard b_queen;
-        colour c_self;
+        n_types::colour c_self;
         bool b_kCastle;
         bool b_qCastle;
 
@@ -28,7 +29,7 @@ namespace n_brd {
         };
     }player;
     typedef struct hisItem {
-        cMove m;
+        n_types::cMove m;
         u8 u_halfMoveClock;
         bitboard b_enPassantDst;
     }hisItem;
@@ -49,7 +50,7 @@ namespace n_brd {
                 .b_knight = 0x2400000000000000,
                 .b_king = 0x1000000000000000,
                 .b_queen = 0x0800000000000000,
-                .c_self = white,
+                .c_self = black,
                 .b_kCastle = true,
                 .b_qCastle = true,
             };
@@ -60,10 +61,11 @@ namespace n_brd {
                 .b_knight = 0x0000000000002400,
                 .b_king = 0x0000000000001000,
                 .b_queen = 0x0000000000000800,
-                .c_self = black,
+                .c_self = white,
                 .b_kCastle = true,
                 .b_qCastle = true,
             };
+            const array<reference_wrapper<player>, 2> a_players = {ref(p_white), ref(p_black)};
             // player p_white {
             //     .b_pawn = 0,
             //         .b_rook = 0,
@@ -86,7 +88,7 @@ namespace n_brd {
             //         .b_kCastle = true,
             //         .b_qCastle = true,
             // };
-            colour c_sideToMove = white;
+            n_types::colour c_sideToMove = white;
             bitboard b_enPassantDst = 0;
             u8 u_halfMoveClock = 0;
             u64 u_fullMoveCounter = 1;
@@ -95,14 +97,14 @@ namespace n_brd {
 
             void _extractBitboardAndAlter(
                     unique_ptr<player> &p,
-                    const piece p_bbIndex,
+                    const n_types::piece p_bbIndex,
                     const square s_old,
                     const square s_new);
             bitboard &extractBitboard(unique_ptr<player> &p, const u8 u_bbIndex);
-            void _playAtk(unique_ptr<player> &p, const cMove &m);
-            void _playDfd(unique_ptr<player> &p, const cMove &m);
-            void _unPlayAtk(unique_ptr<player> &p, const cMove &m);
-            void _unPlayDfd(unique_ptr<player> &p, const cMove &m);
+            void _playAtk(unique_ptr<player> &p, const n_types::cMove &m);
+            void _playDfd(unique_ptr<player> &p, const n_types::cMove &m);
+            void _unPlayAtk(unique_ptr<player> &p, const n_types::cMove &m);
+            void _unPlayDfd(unique_ptr<player> &p, const n_types::cMove &m);
             void _parsePP(string_view sv_pp);
             void _parseSTM(string_view sv_pp);
             void _parseCA(string_view sv_pp);
@@ -115,41 +117,48 @@ namespace n_brd {
             string _pos2string() const;
             string _data2string() const;
             void _enumerateMoveTrgts(
-                    vector<cMove> &v_dst,
+                    vector<n_types::cMove> &v_dst,
                     const bitboard bb_atk,
                     const bitboard bb_dfds,
-                    const piece p_atk
+                    const n_types::piece p_atk
                     );
             void _enumerateMoves(
-                    vector<cMove> &v_dst,
-                    colour c_src,
-                    piece p_src,
+                    vector<n_types::cMove> &v_dst,
+                    n_types::colour c_src,
+                    n_types::piece p_src,
                     bitboard bb_src);
-            bool _isKingInCheck(const colour c);
+            bool _isKingInCheck(const n_types::colour c);
             player &playerToMove();
             player &playerToWatch();
-            piece _square2piece(const square s);
-            void _genPawnMoves(vector<cMove> &v_dst, const bitboard bb_friendlies);
+            n_types::piece _square2piece(const square s);
+            void _genPawnMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
 
             bitboard _calcOccupied() const;
-            void _genRookMoves(vector<cMove> &v_dst, const bitboard bb_friendlies);
+            void _genRookMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
 
-            void _genBishopMoves(vector<cMove> &v_dst, const bitboard bb_friendlies);
+            void _genBishopMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
 
-            void _genKnightMoves(vector<cMove> &v_dst, const bitboard bb_friendlies);
+            void _genKnightMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
 
-            void _genQueenMoves(vector<cMove> &v_dst, const bitboard bb_friendlies);
+            void _genQueenMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
 
-            void _genKingMoves(vector<cMove> &v_dst, const bitboard bb_friendlies);
+            void _genKingMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
+
+            s64 _evalMat();
+
+            s64 _evalPos();
+
+            s64 _evalMov();
 
         public:
             board();
             int loadFen(string_view sv_fen);
-            void playMove(const cMove m);
+            void playMove(const n_types::cMove m);
             void unPlayMove();
-            vector<cMove> genLegalMoves();
-            vector<cMove> genPseudoLegalMoves();
+            vector<n_types::cMove> genLegalMoves();
+            vector<n_types::cMove> genPseudoLegalMoves();
             string str() const;
-
+            s64 eval();
+            s64 evalInit();
     };
 }

@@ -9,6 +9,7 @@ namespace n_b {
     using namespace n_brd;
     using namespace n_bbd;
     using namespace n_types;
+    using namespace tConsts;
     string msg = "";
     bool ret = true;
     bool testFen() {
