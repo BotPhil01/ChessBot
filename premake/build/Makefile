@@ -47,8 +47,8 @@ TARGETDIR = ../../bin/Debug
 TARGET = $(TARGETDIR)/ChessBot
 OBJDIR = obj/Debug
 DEFINES += -DDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
 ALL_LDFLAGS += $(LDFLAGS)
 
 else ifeq ($(config),release)
@@ -56,8 +56,8 @@ TARGETDIR = ../../bin/Release
 TARGET = $(TARGETDIR)/ChessBot
 OBJDIR = obj/Release
 DEFINES += -DNDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
 ALL_LDFLAGS += $(LDFLAGS) -s
 
 else ifeq ($(config),tests)
@@ -65,8 +65,8 @@ TARGETDIR = ../../bin/Tests
 TARGET = $(TARGETDIR)/ChessBot
 OBJDIR = obj/Tests
 DEFINES += -DTESTS
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
 ALL_LDFLAGS += $(LDFLAGS)
 
 endif

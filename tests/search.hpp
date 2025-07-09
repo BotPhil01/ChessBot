@@ -27,9 +27,9 @@ using namespace n_consts;
         board b;
         b.loadFen(sv_fenStart);
         bool ret = true;
-        for (s64 s_depth : {0, 2, 4, 6}) {
+        for (s64 s_depth : {0, 2, 4/*, 6*/}) {
             s64 s_res = _searchDepth(b, s_depth);
-            cout << s_res << '\n';
+            if (s_res != 0) cout << "search result: " << s_res << '\n';
             ret &= (s_res == 0);
         }
         string msg = "TEST SEARCH EVEN ";

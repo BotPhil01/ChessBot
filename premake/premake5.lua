@@ -3,6 +3,7 @@ workspace "ChessBot"
     location ".."
 
 project "ChessBot"
+    buildoptions { "-std=c++20" }
     location "build"
     kind "ConsoleApp"
     language "C++"
