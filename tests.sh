@@ -8,7 +8,16 @@ if [[ $? -ne 0 ]]; then
 fi
 path="./bin/Tests/ChessBot"
 echo "$prefix executing $path"
-$path
+
+testPrefix="./tests/results/"
+oldfile=$(ls $testPrefix | tail -n 1)
+newfile=$(echo "$(($oldfile + 1))")
+$path | 
+    while IFS= read -r line; do
+        echo $line
+        echo $line >> $testPrefix$newfile
+    done
+
 exitcode=0
 if [[ $# -eq 1 ]]; then
     if [[ $1 == "n" || $1 == "no" ]]; then

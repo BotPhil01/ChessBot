@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <atomic>
 
 #pragma once
 using namespace std;
@@ -15,6 +16,22 @@ using namespace std;
 #define s16 int16_t
 #define s32 int32_t
 #define s64 int64_t
+
+#define as8 atomic_int8_t
+#define as16 atomic_int16_t
+#define as32 atomic_int32_t
+#define as64 atomic_int64_t
+
+#define au8 atomic_uint8_t
+#define au16 atomic_uint16_t
+#define au32 atomic_uint32_t
+#define au64 atomic_uint64_t
+
+// redefine due to twos complement adding 1 extra number for negative 
+// the above makes -INT64_MIN return INT64_MIN
+// redefinition makes INT64_MAX the inverse of INT64_MIN under -
+#undef INT64_MIN
+#define INT64_MIN 0x8000000000000001
 
 // bitboard is defined using little endian rank file
 typedef u64 bitboard;

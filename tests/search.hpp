@@ -6,7 +6,8 @@ using namespace n_brd;
 using namespace n_consts;
     bool _testDepthZero() {
         board b;
-        bool ret = _negamax(b, 0, 0, 0) == b.eval();
+        stop_token st;
+        bool ret = _negamax(b, 0, 0, 0, st) == b.eval();
         string msg = "TEST SEARCH DEPTH ZERO ";
         tConsts::eval(ret, msg);
         return ret;
@@ -19,7 +20,7 @@ using namespace n_consts;
         bool ret = s_eval == 0;
         string msg = "TEST SEARCH INIT ";
         tConsts::eval(ret, msg);
-        // cout << s_eval << "\n";
+        if (!ret) cout << s_eval << "\n";
         return ret;
     }
 
@@ -39,8 +40,8 @@ using namespace n_consts;
 
     bool tests() {
         return 
+            _testDepthZero() &&
             _testSearchInit() &&
-            _testSearchEven() &&
-            _testDepthZero();
+            _testSearchEven();
     }
 }
