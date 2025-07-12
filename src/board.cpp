@@ -1,7 +1,6 @@
 #include "../include/types.hpp"
 #include "../include/constants.hpp"
 #include "../include/bitboard.hpp"
-#include "../include/magics.hpp"
 #include "../include/board.hpp"
 #include "../include/sliding.hpp"
 #include <cctype>

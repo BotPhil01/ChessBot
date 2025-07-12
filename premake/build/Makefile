@@ -83,7 +83,6 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/bitboard.o
 GENERATED += $(OBJDIR)/board.o
-GENERATED += $(OBJDIR)/magics.o
 GENERATED += $(OBJDIR)/nodectr.o
 GENERATED += $(OBJDIR)/printer.o
 GENERATED += $(OBJDIR)/search.o
@@ -92,7 +91,6 @@ GENERATED += $(OBJDIR)/timer.o
 GENERATED += $(OBJDIR)/types.o
 OBJECTS += $(OBJDIR)/bitboard.o
 OBJECTS += $(OBJDIR)/board.o
-OBJECTS += $(OBJDIR)/magics.o
 OBJECTS += $(OBJDIR)/nodectr.o
 OBJECTS += $(OBJDIR)/printer.o
 OBJECTS += $(OBJDIR)/search.o
@@ -184,9 +182,6 @@ $(OBJDIR)/bitboard.o: ../../src/bitboard.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/board.o: ../../src/board.cpp
-	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/magics.o: ../../src/magics.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/nodectr.o: ../../src/nodectr.cpp
