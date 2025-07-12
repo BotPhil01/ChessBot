@@ -47,27 +47,27 @@ TARGETDIR = ../../bin/Debug
 TARGET = $(TARGETDIR)/ChessBot
 OBJDIR = obj/Debug
 DEFINES += -DDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
-ALL_LDFLAGS += $(LDFLAGS)
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fsanitize=thread -fsanitize=undefined -g -std=c++20
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fsanitize=thread -fsanitize=undefined -g -std=c++20
+ALL_LDFLAGS += $(LDFLAGS) -fsanitize=thread -fsanitize=undefined
 
 else ifeq ($(config),release)
 TARGETDIR = ../../bin/Release
 TARGET = $(TARGETDIR)/ChessBot
 OBJDIR = obj/Release
 DEFINES += -DNDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++20
-ALL_LDFLAGS += $(LDFLAGS) -s
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -fsanitize=thread -fsanitize=undefined -std=c++20
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -fsanitize=thread -fsanitize=undefined -std=c++20
+ALL_LDFLAGS += $(LDFLAGS) -fsanitize=thread -fsanitize=undefined -s
 
 else ifeq ($(config),tests)
 TARGETDIR = ../../bin/Tests
 TARGET = $(TARGETDIR)/ChessBot
 OBJDIR = obj/Tests
 DEFINES += -DTESTS
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -std=c++20
-ALL_LDFLAGS += $(LDFLAGS)
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fsanitize=thread -fsanitize=undefined -g -std=c++20
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fsanitize=thread -fsanitize=undefined -g -std=c++20
+ALL_LDFLAGS += $(LDFLAGS) -fsanitize=thread -fsanitize=undefined
 
 endif
 
@@ -84,16 +84,20 @@ OBJECTS :=
 GENERATED += $(OBJDIR)/bitboard.o
 GENERATED += $(OBJDIR)/board.o
 GENERATED += $(OBJDIR)/magics.o
+GENERATED += $(OBJDIR)/nodectr.o
 GENERATED += $(OBJDIR)/printer.o
 GENERATED += $(OBJDIR)/search.o
 GENERATED += $(OBJDIR)/sliding.o
+GENERATED += $(OBJDIR)/timer.o
 GENERATED += $(OBJDIR)/types.o
 OBJECTS += $(OBJDIR)/bitboard.o
 OBJECTS += $(OBJDIR)/board.o
 OBJECTS += $(OBJDIR)/magics.o
+OBJECTS += $(OBJDIR)/nodectr.o
 OBJECTS += $(OBJDIR)/printer.o
 OBJECTS += $(OBJDIR)/search.o
 OBJECTS += $(OBJDIR)/sliding.o
+OBJECTS += $(OBJDIR)/timer.o
 OBJECTS += $(OBJDIR)/types.o
 
 ifeq ($(config),debug)
@@ -185,6 +189,9 @@ $(OBJDIR)/board.o: ../../src/board.cpp
 $(OBJDIR)/magics.o: ../../src/magics.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/nodectr.o: ../../src/nodectr.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/printer.o: ../../src/printer.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -192,6 +199,9 @@ $(OBJDIR)/search.o: ../../src/search.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/sliding.o: ../../src/sliding.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/timer.o: ../../src/timer.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/types.o: ../../src/types.cpp

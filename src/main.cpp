@@ -1,9 +1,6 @@
-#include "../include/printer.hpp"
-#include "../include/bitboard.hpp"
-#include "../include/constants.hpp"
-#include "../include/types.hpp"
-
+#include <iostream>
 int main() {
-    const n_types::board b;
-    n_prt::bprint(b);
+    int x = 0;
+    x = 1;
+    std::cout << x << "\n";
 }

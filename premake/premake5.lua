@@ -4,6 +4,7 @@ workspace "ChessBot"
 
 project "ChessBot"
     buildoptions { "-std=c++20" }
+    sanitize {"Thread", "UndefinedBehavior" }
     location "build"
     kind "ConsoleApp"
     language "C++"

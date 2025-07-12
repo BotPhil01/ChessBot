@@ -158,7 +158,7 @@ namespace n_brd {
             vector<n_types::cMove> genLegalMoves();
             vector<n_types::cMove> genPseudoLegalMoves();
             string str() const;
-            s64 eval();
-            s64 evalInit();
+            n_types::evl eval();
+            n_types::evl evalInit();
     };
 }

@@ -2,8 +2,6 @@
 #include "../include/types.hpp"
 #include "../include/board.hpp"
 
-#pragma once
-
 namespace n_prt {
     using namespace n_types;
     using namespace n_brd;

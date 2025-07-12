@@ -237,7 +237,7 @@ void board::_extractBitboardAndAlter(
         const square s_new) {
     assert(p != nullptr);
     if (p_bbIndex == EMPTY) return;
-    bitboard &b = p->a_bitboards[p_bbIndex];
+    bitboard &b = p->a_bitboards.at(p_bbIndex);
     // remove old
     b &= ~s_old;
     // add new
@@ -435,8 +435,8 @@ void board::_genPawnMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
 bitboard board::_calcOccupied() const {
     bitboard bb_ret = 0;
     for (u8 i = 0; i < this->p_white.a_bitboards.size(); i++) {
-        bb_ret |= p_white.a_bitboards[i];
-        bb_ret |= p_black.a_bitboards[i];
+        bb_ret |= this->p_white.a_bitboards[i];
+        bb_ret |= this->p_black.a_bitboards[i];
     }
     return bb_ret;
 }
