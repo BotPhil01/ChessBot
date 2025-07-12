@@ -144,6 +144,16 @@ namespace n_brd {
 
             void _genKingMoves(vector<n_types::cMove> &v_dst, const bitboard bb_friendlies);
 
+            /*
+             * @return colour of winner if game has ended in checkmate
+             * @return STALEMATE if stalemate
+             * @return FIDDY if fifty move rule is broken
+             * @return NOEND if game is not ended
+             */
+#define STALEMATE -1
+#define FIDDY -2
+#define NOEND -3
+            s64 _isGameOver();
             s64 _evalMat();
 
             s64 _evalPos();

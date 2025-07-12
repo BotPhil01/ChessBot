@@ -263,6 +263,19 @@ void board::_unPlayDfd(unique_ptr<player> &p, const cMove &m) {
     this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdNew, m.s_dfdOld);
 }
 
+void board::_sethmc(const cMove m) {
+    if (
+            !m.isQuiet() ||
+            m.isCastling() ||
+            m.isPromoting() ||
+            m.p_atk == PAWN
+       ) {
+        this->u_halfMoveClock = 0;
+    } else {
+        this->u_halfMoveClock++;
+    }
+}
+
 void board::playMove(const cMove m) {
     unique_ptr<player> up_atk = nullptr;
     unique_ptr<player> up_dfd = nullptr;
@@ -284,8 +297,10 @@ void board::playMove(const cMove m) {
             .u_halfMoveClock = this->u_halfMoveClock,
             .b_enPassantDst = this->b_enPassantDst,
             });
-    this->u_halfMoveClock++;
-    if (this->u_halfMoveClock % 2 == 0) {
+
+    // this->u_halfMoveClock++;
+    this->_sethmc(m);
+    if (m.c_atk == black) {
         this->u_fullMoveCounter++;
     }
 }
@@ -681,8 +696,31 @@ vector<cMove> board::genLegalMoves() {
     return v_ret;
 }
 
-s64 board::eval() {
-    return this->_evalMat() + this->_evalPos() + this->_evalMov();
+s64 board::_isGameOver() {
+    if (this->genLegalMoves().size() == 0) {
+        if (this->_isKingInCheck(this->c_sideToMove)) {
+            return !this->c_sideToMove;
+        }
+        // current player to move has lost
+        return STALEMATE;
+    }
+    if (this->u_halfMoveClock == 50) return FIDDY;
+    return NOEND;
+}
+
+evl board::eval() {
+    const s64 s_overResult = this->_isGameOver();
+    switch(s_overResult) {
+        case NOEND: return 
+                        this->_evalMat() +
+                            this->_evalPos() +
+                            this->_evalMov();
+        case FIDDY:
+        case STALEMATE: return 0;
+        case white: return INT64_MAX;
+        case black: return INT64_MIN;
+    }
+    return INT64_MIN;
 }
 
 s64 board::evalInit() {
