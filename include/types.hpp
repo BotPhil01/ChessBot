@@ -25,7 +25,7 @@ using namespace std;
 #define au8 atomic_uint8_t
 #define au16 atomic_uint16_t
 #define au32 atomic_uint32_t
-#define au64 atomic_uint64_t
+#define au64 atomic<uint64_t>
 
 
 // redefine due to twos complement adding 1 extra number for negative 

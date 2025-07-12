@@ -1,5 +1,6 @@
 #include "../include/search.hpp"
 #include "../include/constants.hpp"
+#include "../include/nodectr.hpp"
 #include "tConsts.hpp"
 namespace n_sch {
 using namespace n_brd;
@@ -23,27 +24,48 @@ using namespace n_consts;
         string msg = "TEST SEARCH INIT ";
         tConsts::eval(ret, msg);
         if (!ret) cout << s_eval << "\n";
+        cout << "final count" << n_ctr::au_ctr << "\n";
         // cout << "exiting test search init\n";
         return ret;
     }
 
-    // bool _testSearchEven() {
-    //     board b;
-    //     b.loadFen(sv_fenStart);
-    //     bool ret = true;
-    //     for (s64 s_depth : {0, 2, 4/*, 6*/}) {
-    //         s64 s_res = _searchDepth(b, s_depth);
-    //         if (s_res != 0) cout << "search result: " << s_res << '\n';
-    //         ret &= (s_res == 0);
-    //     }
-    //     string msg = "TEST SEARCH EVEN ";
-    //     tConsts::eval(ret, msg);
-    //     return ret;
-    // }
+    bool _testSearchWhite() {
+        board b;
+        b.loadFen("3k4/8/8/8/8/8/8/6QK w - - 0 1");
+
+        s64 s_eval = search(b);
+
+        bool ret = s_eval > 0;
+        string msg = "TEST SEARCH WHITE ";
+        
+        tConsts::eval(ret, msg);
+        if (!ret) cout << s_eval << "\n";
+        cout << "final count" << n_ctr::au_ctr << "\n";
+        // cout << "exiting test search init\n";
+        return ret;
+    }
+
+    bool _testSearchBlack() {
+        board b;
+        b.loadFen("3K4/8/8/8/8/8/8/6qk w - - 0 1");
+
+        s64 s_eval = search(b);
+
+        bool ret = s_eval < 0;
+        string msg = "TEST SEARCH BLACK ";
+        
+        tConsts::eval(ret, msg);
+        if (!ret) cout << s_eval << "\n";
+        cout << "final count" << n_ctr::au_ctr << "\n";
+        // cout << "exiting test search init\n";
+        return ret;
+    }
 
     bool tests() {
         // cout << "entering search tests\n";
-        return _testSearchInit();
+        return _testSearchInit()
+            && _testSearchWhite()
+            &&_testSearchBlack();
             // _testDepthZero() &&
             // _testSearchEven();
     }

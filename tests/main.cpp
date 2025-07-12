@@ -12,6 +12,5 @@ int main() {
     // sum += n_tmr::tests();
     sum += n_ctr::tests();
     sum += n_sch::tests();
-    cout << sum << "\n";
 }
 
