@@ -121,7 +121,8 @@ namespace n_types {
          p_dfd(p_dfd),
          s_dfdOld(s_dfdOld),
          s_dfdNew(s_dfdNew) {}
-
+        friend inline bool operator==(const n_types::cMove &a, const n_types::cMove &m);
+        friend inline bool operator!=(const n_types::cMove &a, const n_types::cMove &m);
         constexpr bool isPromoting() const {
             if (p_atk != e_piece::PAWN) {
                 return false;
@@ -151,6 +152,10 @@ namespace n_types {
             return ((b_srcMask & s_atkNew) != 0 &&
                     (b_dstMask & s_atkNew) != 0);
         }
+        
+        constexpr bool isQuiet() const {
+            return (c_atk == c_dfd) || (p_dfd == EMPTY);
+        }
 
         // returns similar algebraic notation
         string str() const {
@@ -165,7 +170,23 @@ namespace n_types {
             return s_ret;
         }
     }cMove;
+    inline bool operator==(const n_types::cMove &a, const n_types::cMove &m) {
+        return a.c_atk == m.c_atk &&
+            a.p_atk == m.p_atk &&
+            a.s_atkOld == m.s_atkOld &&
+            a.s_atkNew == m.s_atkNew &&
+            a.c_dfd == m.c_dfd &&
+            a.p_dfd == m.p_dfd &&
+            a.s_dfdOld == m.s_dfdOld &&
+            a.s_dfdNew == m.s_dfdNew;
+    }
+
+    inline bool operator!=(const n_types::cMove &a, const n_types::cMove &m) {
+        return !(a == m);
+    }
+
 }
+
 
 inline ostream& operator<<(ostream& os, int8_t value) {
     return os << static_cast<int>(value);

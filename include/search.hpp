@@ -6,7 +6,7 @@
 // iterative deepening
 
 namespace n_sch {
-#define MAXDEPTH 4
+#define MAXDEPTH 2
     n_types::evl search(n_brd::board b);
 }
 

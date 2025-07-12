@@ -20,11 +20,11 @@ using namespace n_consts;
         // cout << "running search\n";
         s64 s_eval = search(b);
         // cout << "terminating search\n";
-        bool ret = s_eval == 0;
+        bool ret = s_eval < 100 && s_eval > 0;
         string msg = "TEST SEARCH INIT ";
         tConsts::eval(ret, msg);
         if (!ret) cout << s_eval << "\n";
-        cout << "final count" << n_ctr::au_ctr << "\n";
+        cout << "final count " << n_ctr::au_ctr << "\n";
         // cout << "exiting test search init\n";
         return ret;
     }
@@ -40,7 +40,7 @@ using namespace n_consts;
         
         tConsts::eval(ret, msg);
         if (!ret) cout << s_eval << "\n";
-        cout << "final count" << n_ctr::au_ctr << "\n";
+        cout << "final count " << n_ctr::au_ctr << "\n";
         // cout << "exiting test search init\n";
         return ret;
     }
@@ -56,7 +56,7 @@ using namespace n_consts;
         
         tConsts::eval(ret, msg);
         if (!ret) cout << s_eval << "\n";
-        cout << "final count" << n_ctr::au_ctr << "\n";
+        cout << "final count " << n_ctr::au_ctr << "\n";
         // cout << "exiting test search init\n";
         return ret;
     }

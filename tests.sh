@@ -10,7 +10,7 @@ path="./bin/Tests/ChessBot"
 echo "$prefix executing $path"
 
 testPrefix="./tests/results/"
-oldfile=$(ls $testPrefix | tail -n 1)
+oldfile=$(ls $testPrefix | sort -g | tail -n 1)
 newfile=$(echo "$(($oldfile + 1))")
 $path | 
     while IFS= read -r line; do

@@ -1,0 +1,34 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN SUCCESS
+TEST PLAY MOVE SUCCESS
+TEST PLAY MOVE SUCCESS
+TEST GEN MOVE SUCCESS
+TEST LEGAL GEN MOVE SUCCESS
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 86056
+Nodes searched in it 1 44764
+Nodes searched in it 2 44764
+Nodes searched in it 3 44764
+Nodes searched in it 4 44764
+TEST SEARCH INIT SUCCESS
+final count265112
+Nodes searched in it 0 5156
+Nodes searched in it 1 3204
+Nodes searched in it 2 3204
+Nodes searched in it 3 3204
+Nodes searched in it 4 3204
+TEST SEARCH WHITE SUCCESS
+final count17972
+Nodes searched in it 0 5703
+Nodes searched in it 1 5556
+Nodes searched in it 2 5556
+Nodes searched in it 3 5556
+Nodes searched in it 4 5556
+TEST SEARCH BLACK SUCCESS
+final count27927

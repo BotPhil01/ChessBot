@@ -76,4 +76,15 @@ namespace n_consts {
     const array<char, 6> sv_fenBPieces = {
         'p', 'r', 'b', 'n', 'k', 'q'
     };
+
+    const n_types::cMove m_empty(
+        black,
+        n_types::EMPTY,
+        0,
+        0,
+        black,
+        n_types::EMPTY,
+        0,
+        0
+        );
 }
