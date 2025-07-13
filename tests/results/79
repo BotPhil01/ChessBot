@@ -1,0 +1,31 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN SUCCESS
+TEST PLAY MOVE SUCCESS
+TEST UNPLAY MOVE SUCCESS
+TEST GEN MOVE SUCCESS
+TEST LEGAL GEN MOVE SUCCESS
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 1
+Quiesce depth reached 0 0
+Nodes collision in it 0 0
+Nodes searched in it 1 21
+Quiesce depth reached 1 0
+Nodes collision in it 1 15
+Nodes searched in it 2 113
+Quiesce depth reached 2 0
+Nodes collision in it 2 72
+Nodes searched in it 3 576
+Quiesce depth reached 3 0
+Nodes collision in it 3 450
+Nodes searched in it 4 31950
+Quiesce depth reached 4 1
+Nodes collision in it 4 26008
+Nodes searched in it 5 30628
+Quiesce depth reached 5 1
+Nodes collision in it 5 22958

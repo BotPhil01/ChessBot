@@ -1,6 +1,8 @@
 #include "../include/search.hpp"
 #include "../include/types.hpp"
 #include "../include/board.hpp"
+#include "../include/transpo.hpp"
+
 #include "../include/constants.hpp"
 #include "../include/nodectr.hpp"
 
@@ -9,39 +11,95 @@ namespace n_sch {
     using namespace n_ctr;
     // using namespace n_tmr;
     using namespace n_types;
+    using namespace n_consts;
 
     namespace {
-        evl _quiesce(board b, evl e_alpha, evl e_beta) {
+        table t;
+        entry _e_tmp;
+#define QMAXDEPTH 100
+        evl _quiesce(board b, evl e_alpha, evl e_beta, u32 u_depth) {
+            au_quiDepth = max((u64) au_quiDepth.load(), (u64) QMAXDEPTH - u_depth);
+            u64 z_best = b.u_zob;
+            cMove m_best = m_empty;
+            const evl e_delta = 975;
             // standing pat
             evl e_best = b.eval();
-
-            if (e_best >= e_beta) {
+            if (u_depth == 0 || e_best >= e_beta) {
+                _e_tmp = {
+                    z_best,
+                    m_best,
+                    0,
+                    e_best,
+                    node::CUT,
+                    0
+                };
+                t.add(_e_tmp);
                 return e_beta;
             }
+
+            // delta cutoff to save processing power
+            if (e_alpha >= INT64_MIN + e_delta &&
+                    e_best < e_alpha - e_delta) {
+                _e_tmp = {
+                    z_best,
+                    m_best,
+                    0,
+                    e_alpha,
+                    node::ALL,
+                    0
+                };
+                t.add(_e_tmp);
+                return e_alpha;
+            }
+
             if (e_best > e_alpha) {
                 e_alpha = e_best;
             }
 
             const vector<cMove> v_moves = b.genLegalMoves();
 
+            bool b_alphaChanged = false;
             for (const cMove m : v_moves) {
                 if (m.isQuiet()) continue;
 
                 b.playMove(m);
-                const evl e_cur = -_quiesce(b, -e_beta, -e_alpha);
+                const evl e_cur = -_quiesce(b, -e_beta, -e_alpha, u_depth-1);
+                const u64 z_cur = b.u_zob;
                 b.unPlayMove();
 
                 if (e_cur >= e_beta) {
+                    _e_tmp = {
+                        z_cur,
+                        m,
+                        0,
+                        e_cur,
+                        node::CUT,
+                        0
+                    };
+                    t.add(_e_tmp);
                     return e_cur;
                 }
                 if (e_cur > e_best) {
                     e_best = e_cur;
+                    z_best = z_cur;
+                    m_best = m;
                     if (e_cur > e_alpha) {
+                        b_alphaChanged = true;
                         e_alpha = e_cur;
                     }
                 }
             }
 
+            node n = b_alphaChanged ? node::PV : node::ALL;
+            _e_tmp = {
+                z_best,
+                m_best,
+                0,
+                e_best,
+                n,
+                0
+            };
+            t.add(_e_tmp);
             return e_best;
         }
 
@@ -50,19 +108,51 @@ namespace n_sch {
                 evl e_alpha,
                 evl e_beta,
                 u16 u_depth,
-                const cMove m_suggestion = n_consts::m_empty) {
+                cMove m_suggestion = n_consts::m_empty) {
+            n_ctr::au_ctr++;
+            const entry e = t.query(b.u_zob);
+            if (e.u_hash != e_empty.u_hash && e.u_depth >= u_depth) {
+                n_ctr::au_col++;
+                if (e.n == node::PV) {
+                    // cout << "PV cutoff\n";
+                    return {e.e, e.m_best};
+                }
+                if (e.n == node::ALL && e.e <= e_alpha) {
+                    // cout << "All cutoff\n";
+                    return {e.e, e.m_best};
+                }
+                if (e.n == node::CUT && e.e >= e_beta) {
+                    // cout << "Cut cutoff\n";
+                    return {e.e, e.m_best};
+                }
+            }
+
             cMove m_best = n_consts::m_empty;
             evl e_best = INT64_MIN;
-            n_ctr::au_ctr++;
+            u64 z_best = b.u_zob;
             if (u_depth == 0) {
+                e_best = _quiesce(b, e_alpha, e_beta, QMAXDEPTH);
+                _e_tmp = {
+                    z_best,
+                    m_best,
+                    u_depth,
+                    e_best,
+                    node::PV,
+                    0
+                };
+                t.add(_e_tmp);
                 return {
-                    _quiesce(b, e_alpha, e_beta),
-                    // b.eval(),
-                    n_consts::m_empty
+                    e_best,
+                        n_consts::m_empty
                 };
             }
 
-            if (m_suggestion == n_consts::m_empty) {
+            if (m_suggestion == m_empty) {
+                m_suggestion = e.m_best;
+            }
+
+            bool b_alphaChanged = false;
+            if (m_suggestion != n_consts::m_empty) {
                 b.playMove(m_suggestion);
                 e_best = -_negamax(b, -e_beta, -e_alpha, u_depth-1).first;
                 m_best = m_suggestion;
@@ -73,6 +163,7 @@ namespace n_sch {
                 }
 
                 if (e_best > e_alpha) {
+                    b_alphaChanged = true;
                     e_alpha = e_best;
                 }
             }
@@ -83,20 +174,46 @@ namespace n_sch {
                 const cMove m = v_moves[i];
                 b.playMove(m);
                 const evl e_cur = -_negamax(b, -e_beta, -e_alpha, u_depth-1).first;
+                const u64 z_cur = zobrist(b);
                 b.unPlayMove();
 
                 if (e_cur >= e_beta) {
+                    _e_tmp = {
+                        z_cur,
+                        m,
+                        u_depth,
+                        e_cur,
+                        CUT,
+                        0
+                    };
+                    t.add(_e_tmp);
                     return {e_cur, m};
                 }
+                // 20295809
 
                 if (e_cur > e_best) {
                     e_best = e_cur;
                     m_best = m;
+                    z_best = z_cur;
                     if (e_cur > e_alpha) {
+                        b_alphaChanged = true;
                         e_alpha = e_cur;
                     }
                 }
             }
+            node n_tmp = node::PV;
+            if (b_alphaChanged) {
+                n_tmp = node::ALL;
+            }
+            _e_tmp = {
+                z_best,
+                m_best,
+                u_depth,
+                e_best,
+                n_tmp,
+                0
+            };
+            t.add(_e_tmp);
             return {e_best, m_best};
         }
 
@@ -104,6 +221,7 @@ namespace n_sch {
             pair<evl, cMove> p_cur = {INT64_MIN, n_consts::m_empty};
             au_ctr = 0;
             uint64_t u_cum = au_ctr;
+            uint64_t u_col = au_col;
             for (s16 i = 0; i < MAXDEPTH + 1; i++) {
                 pair<evl, cMove> e_ret = _negamax(
                         b,
@@ -114,6 +232,11 @@ namespace n_sch {
                         );
                 cout << "Nodes searched in it " <<
                     i << " " << au_ctr - u_cum << "\n";
+                cout << "Nodes collision in it " <<
+                    i << " " << au_col - u_col << "\n";
+                cout << "Max quiesce depth reached " <<
+                    i << " " << au_quiDepth  << endl;
+                u_col = au_col;
                 u_cum = au_ctr;
                 p_cur = e_ret;
             }

@@ -3,11 +3,14 @@
 #include "../include/bitboard.hpp"
 #include "../include/board.hpp"
 #include "../include/sliding.hpp"
+#include "../include/rands.hpp"
 #include <cctype>
 #include <functional>
 #include <memory>
 #include <string>
 #include <cassert>
+#include <thread>
+#include <chrono>
 
 // fen consists of
 // piece placement
@@ -26,7 +29,9 @@
 using namespace n_brd;
 using namespace n_types;
 using namespace n_bbd;
-board::board() = default;
+using namespace n_rnd;
+board::board() {}
+
 string board::_pos2string() const {
     const u8 u_bbDimension = 8;
     string s_working = "";
@@ -51,7 +56,7 @@ string board::_pos2string() const {
     return s_working;
 }
 
-string board::_data2string() const {
+string board::_data2string() {
     string s = "";
     s += "side to move: ";
     s += col2string(this->c_sideToMove) ;
@@ -65,10 +70,29 @@ string board::_data2string() const {
     s += "full move clock: ";
     s += to_string(this->u_fullMoveCounter);
     s += "\n";
+    s64 s_overCode = this->_isGameOver();
+    s+= "Game result: ";
+    switch (s_overCode) {
+        case FIDDY:
+            s += "stalemate 50 move rule";
+            break;
+        case STALEMATE:
+            s += "stalemate no legal moves";
+            break;
+        case white:
+            s += "white win";
+            break;
+        case black:
+            s += "black win";
+            break;
+        default:
+            s += "game continuing";
+    }
+    s+= "\n";
     return s;
 }
 
-string board::str() const {
+string board::str() {
     std::string s;
     s += this->_pos2string();
     s += this->_data2string();
@@ -90,9 +114,14 @@ char board::_getChar(const bitboard mask) const {
 
 void board::_parsePP(string_view sv_pp) {
     // zero boards
+    // cout << this <<"\n";
+    // cout << &this->p_white.a_bitboards[0].get() <<"\n";
+    // cout << &this->p_black.a_bitboards[0].get() <<endl;
+    // using namespace chrono_literals;
+    // this_thread::sleep_for(5000ms);
     for (u8 i = 0; i < this->p_white.a_bitboards.size(); i++) {
-        this->p_white.a_bitboards[i].get() = 0;
-        this->p_black.a_bitboards[i].get() = 0;
+        this->p_white.a_bitboards.at(i).get() = 0;
+        this->p_black.a_bitboards.at(i).get() = 0;
     }
     // assign boards
     for (u64 u_row = 0; u_row < 8; u_row++) {
@@ -150,186 +179,229 @@ void board::_parseCA(string_view sv_pp) {
     }
 }
 
-void board::_parseEP(string_view sv_pp) {
-    u64 u_col = 0;
-    u64 u_row = 0;
-    for (auto it = sv_pp.begin(); it != sv_pp.end(); it++) {
-        char c = *it;
-        if (c == '-') {
-            this->b_enPassantDst = 0;
-            return;
-        } else if (isdigit(c)) {
-            u_row = c - '0';
+    void board::_parseEP(string_view sv_pp) {
+        u64 u_col = 0;
+        u64 u_row = 0;
+        for (auto it = sv_pp.begin(); it != sv_pp.end(); it++) {
+            char c = *it;
+            if (c == '-') {
+                this->b_enPassantDst = 0;
+                return;
+            } else if (isdigit(c)) {
+                u_row = c - '0';
+            } else {
+                u_col = c - 'a';
+            }
+        }
+        this->b_enPassantDst = (1 << (u_row * 8 + u_col));
+    }
+
+    void board::_parseHMC(string_view sv_pp) {
+        const string s = string(sv_pp);
+        this->u_halfMoveClock = atoi(s.c_str());
+    }
+
+    void board::_parseFMC(string_view sv_pp) {
+        const string s = string(sv_pp);
+        this->u_fullMoveCounter = atoi(s.c_str());
+    }
+
+    string_view board::_isolateEndFenPart(string_view &sv_fen, const string_view sv_separator) {
+        const size_t s_beg = sv_fen.find_last_of(sv_separator);
+        if (s_beg == sv_fen.npos) return sv_fen;
+        const string_view sv_part = sv_fen.substr(s_beg + 1);
+        sv_fen.remove_suffix(sv_part.size() + 1);
+        return sv_part;
+
+    }
+    string_view board::_isolateFenPart(string_view &sv_fen, const string_view sv_separator) {
+        const size_t s_end = sv_fen.find_first_of(sv_separator);
+        if (s_end == sv_fen.npos) return sv_fen;
+        const string_view sv_part = sv_fen.substr(0, s_end);
+        sv_fen.remove_prefix(s_end + 1);
+        return sv_part;
+    }
+
+    int board::loadFen(string_view sv_fen) {
+        const u8 u_fenParts = 6;
+        // isolate part 
+        // parse part
+
+        // fen consists of
+        // piece placement
+        // side to cMove
+        // castling ability
+        // en passant target
+        // half cMove clock
+        // full cMove counter
+        void (board::*a_func[]) (const string_view) = {
+            &board::_parsePP,
+            &board::_parseSTM,
+            &board::_parseCA,
+            &board::_parseEP,
+            &board::_parseHMC,
+            &board::_parseFMC,
+        };
+        for (u8 i = 0; i < u_fenParts; i++) {
+            const string_view sv_pp = _isolateFenPart(sv_fen, " "sv);
+            if (sv_pp.empty()) return 1;
+            void (board::*f_fen) (string_view) = a_func[i];
+            (this->*f_fen)(sv_pp);
+        }
+        this->u_zob = zobrist(*this);
+        return 0;
+    }
+
+    /*
+     * Extracts and alters the bitboard according to params
+     * @param p = player to extract bitboard from
+     * @param u_bbIndex = piece type of bitboard
+     * @param s_old = square to be removed
+     * @param s_new = square to be added
+     */
+    void board::_extractBitboardAndAlter(
+            unique_ptr<player> &p,
+            const piece p_bbIndex,
+            const square s_old,
+            const square s_new) {
+        assert(p != nullptr);
+        if (p_bbIndex == EMPTY) return;
+        bitboard &b = p->a_bitboards.at(p_bbIndex);
+        // remove old
+        b = b & ~s_old;
+        // add new
+        b = b | s_new;
+        assert(bitPopCount(this->p_white.b_pawn) <= 8);
+        assert(bitPopCount(this->p_black.b_pawn) <= 8);
+        assert(bitPopCount(b) <= 8);
+    }
+
+    void board::_playAtk(unique_ptr<player> &p, const cMove &m) {
+        if (p == nullptr) return;
+        this->_extractBitboardAndAlter(p, m.p_atk, m.s_atkOld, m.s_atkNew);
+    }
+
+    void board::_playDfd(unique_ptr<player> &p, const cMove &m) {
+        if (p == nullptr) return;
+        this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdOld, m.s_dfdNew);
+    }
+
+    void board::_unPlayAtk(unique_ptr<player> &p, const cMove &m) {
+        if (p == nullptr) return;
+        this->_extractBitboardAndAlter(p, m.p_atk, m.s_atkNew, m.s_atkOld);
+    }
+
+    void board::_unPlayDfd(unique_ptr<player> &p, const cMove &m) {
+        if (p == nullptr) return;
+        this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdNew, m.s_dfdOld);
+    }
+
+    void board::_sethmc(const cMove m) {
+        if (
+                !m.isQuiet() ||
+                m.isCastling() ||
+                m.isPromoting() ||
+                m.p_atk == PAWN
+           ) {
+            this->u_halfMoveClock = 0;
         } else {
-            u_col = c - 'a';
+            this->u_halfMoveClock++;
         }
     }
-    this->b_enPassantDst = (1 << (u_row * 8 + u_col));
-}
 
-void board::_parseHMC(string_view sv_pp) {
-    const string s = string(sv_pp);
-    this->u_halfMoveClock = atoi(s.c_str());
-}
+    void board::_alterZob(const cMove m) {
+        u32 u_cMul = m.c_atk == white ? 1 : 2;
+        piece p_atk = m.p_atk;
+        u32 u_index = square2index(m.s_atkOld);
+        u_index *= p_atk * u_cMul;
+        this->u_zob ^= a_rands[u_index];
 
-void board::_parseFMC(string_view sv_pp) {
-    const string s = string(sv_pp);
-    this->u_fullMoveCounter = atoi(s.c_str());
-}
+        if (m.isPromoting()) {
+            p_atk = QUEEN;
+        }
+        u_index = square2index(m.s_atkNew);
+        u_index *= p_atk * u_cMul;
+        this->u_zob ^= a_rands[u_index];
 
-string_view board::_isolateEndFenPart(string_view &sv_fen, const string_view sv_separator) {
-    const size_t s_beg = sv_fen.find_last_of(sv_separator);
-    if (s_beg == sv_fen.npos) return sv_fen;
-    const string_view sv_part = sv_fen.substr(s_beg + 1);
-    sv_fen.remove_suffix(sv_part.size() + 1);
-    return sv_part;
+        if (m.p_dfd != n_types::EMPTY && m.s_dfdNew) {
+            piece p_dfd = m.p_dfd;
+            u_cMul = m.c_dfd == white ? 1 : 2;
+            u_index = square2index(m.s_dfdNew);
+            u_index *= p_dfd * u_cMul;
+            this->u_zob ^= a_rands[u_index];
+        }
+        
+        // ep
+        const array<u32, 8> a_enPassant = {
+            56, 57, 58, 59, 
+            60, 61, 62, 63, 
+        };
+        if (this->b_enPassantDst) {
+            u32 u_epIndex = a_enPassant[this->b_enPassantDst % 8];
+            this->u_zob ^= a_rands[u_epIndex];
+        }
 
-}
-string_view board::_isolateFenPart(string_view &sv_fen, const string_view sv_separator) {
-    const size_t s_end = sv_fen.find_first_of(sv_separator);
-    if (s_end == sv_fen.npos) return sv_fen;
-    const string_view sv_part = sv_fen.substr(0, s_end);
-    sv_fen.remove_prefix(s_end + 1);
-    return sv_part;
-}
-
-int board::loadFen(string_view sv_fen) {
-    const u8 u_fenParts = 6;
-    // isolate part 
-    // parse part
-
-    // fen consists of
-    // piece placement
-    // side to cMove
-    // castling ability
-    // en passant target
-    // half cMove clock
-    // full cMove counter
-    void (board::*a_func[]) (const string_view) = {
-        &board::_parsePP,
-        &board::_parseSTM,
-        &board::_parseCA,
-        &board::_parseEP,
-        &board::_parseHMC,
-        &board::_parseFMC,
-    };
-    for (u8 i = 0; i < u_fenParts; i++) {
-        const string_view sv_pp = _isolateFenPart(sv_fen, " "sv);
-        if (sv_pp.empty()) return 1;
-        void (board::*f_fen) (string_view) = a_func[i];
-        (this->*f_fen)(sv_pp);
+        // colour to play
+        this->u_zob ^= a_rands[0];
     }
-    return 0;
-}
 
-/*
- * Extracts and alters the bitboard according to params
- * @param p = player to extract bitboard from
- * @param u_bbIndex = piece type of bitboard
- * @param s_old = square to be removed
- * @param s_new = square to be added
- */
-void board::_extractBitboardAndAlter(
-        unique_ptr<player> &p,
-        const piece p_bbIndex,
-        const square s_old,
-        const square s_new) {
-    assert(p != nullptr);
-    if (p_bbIndex == EMPTY) return;
-    bitboard &b = p->a_bitboards.at(p_bbIndex);
-    // remove old
-    b &= ~s_old;
-    // add new
-    b |= s_new;
-}
+    void board::playMove(const cMove m) {
+        unique_ptr<player> up_atk = nullptr;
+        unique_ptr<player> up_dfd = nullptr;
+        if (m.c_atk == white) {
+            up_atk = make_unique<player>(this->p_white);
+        } else {
+            up_atk = make_unique<player>(this->p_black);
+        }
+        if (m.c_dfd == white) {
+            up_dfd = make_unique<player>(this->p_white);
+        } else {
+            up_dfd = make_unique<player>(this->p_black);
+        }
+        this->_playAtk(up_atk, m);
+        this->_playDfd(up_dfd, m);
+        this->c_sideToMove = !this->c_sideToMove;
+        this->s_moveHistory.push({
+                .m = m,
+                .u_halfMoveClock = this->u_halfMoveClock,
+                .b_enPassantDst = this->b_enPassantDst,
+                });
 
-void board::_playAtk(unique_ptr<player> &p, const cMove &m) {
-    if (p == nullptr) return;
-    this->_extractBitboardAndAlter(p, m.p_atk, m.s_atkOld, m.s_atkNew);
-}
-
-void board::_playDfd(unique_ptr<player> &p, const cMove &m) {
-    if (p == nullptr) return;
-    this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdOld, m.s_dfdNew);
-}
-
-void board::_unPlayAtk(unique_ptr<player> &p, const cMove &m) {
-    if (p == nullptr) return;
-    this->_extractBitboardAndAlter(p, m.p_atk, m.s_atkNew, m.s_atkOld);
-}
-
-void board::_unPlayDfd(unique_ptr<player> &p, const cMove &m) {
-    if (p == nullptr) return;
-    this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdNew, m.s_dfdOld);
-}
-
-void board::_sethmc(const cMove m) {
-    if (
-            !m.isQuiet() ||
-            m.isCastling() ||
-            m.isPromoting() ||
-            m.p_atk == PAWN
-       ) {
-        this->u_halfMoveClock = 0;
-    } else {
-        this->u_halfMoveClock++;
+        // this->u_halfMoveClock++;
+        this->_sethmc(m);
+        if (m.c_atk == black) {
+            this->u_fullMoveCounter++;
+        }
+        this->_alterZob(m);
     }
-}
 
-void board::playMove(const cMove m) {
-    unique_ptr<player> up_atk = nullptr;
-    unique_ptr<player> up_dfd = nullptr;
-    if (m.c_atk == white) {
-        up_atk = make_unique<player>(this->p_white);
-    } else {
-        up_atk = make_unique<player>(this->p_black);
-    }
-    if (m.c_dfd == white) {
-        up_dfd = make_unique<player>(this->p_white);
-    } else {
-        up_dfd = make_unique<player>(this->p_black);
-    }
-    this->_playAtk(up_atk, m);
-    this->_playDfd(up_dfd, m);
-    this->c_sideToMove = !this->c_sideToMove;
-    this->s_moveHistory.push({
-            .m = m,
-            .u_halfMoveClock = this->u_halfMoveClock,
-            .b_enPassantDst = this->b_enPassantDst,
-            });
-
-    // this->u_halfMoveClock++;
-    this->_sethmc(m);
-    if (m.c_atk == black) {
-        this->u_fullMoveCounter++;
-    }
-}
-
-void board::unPlayMove() {
-    assert(!this->s_moveHistory.empty());
-    const hisItem hi_state = this->s_moveHistory.top();
-    const cMove m = hi_state.m;
-    this->s_moveHistory.pop();
-    unique_ptr<player> up_atk = nullptr;
-    unique_ptr<player> up_dfd = nullptr;
-    if (m.c_atk == white) {
-        up_atk = make_unique<player>(this->p_white);
-    } else {
-        up_atk = make_unique<player>(this->p_black);
-    }
-    if (m.c_dfd == white) {
-        up_dfd = make_unique<player>(this->p_white);
-    } else {
-        up_dfd = make_unique<player>(this->p_black);
-    }
-    this->_unPlayAtk(up_atk, m);
-    this->_unPlayDfd(up_dfd, m);
-    this->c_sideToMove = !this->c_sideToMove;
-    this->u_halfMoveClock = hi_state.u_halfMoveClock;
-    this->b_enPassantDst = hi_state.b_enPassantDst;
-    if (this->c_sideToMove == black) {
-        this->u_fullMoveCounter--;
-    }
+    void board::unPlayMove() {
+        assert(!this->s_moveHistory.empty());
+        const hisItem hi_state = this->s_moveHistory.top();
+        const cMove m = hi_state.m;
+        this->s_moveHistory.pop();
+        unique_ptr<player> up_atk = nullptr;
+        unique_ptr<player> up_dfd = nullptr;
+        if (m.c_atk == white) {
+            up_atk = make_unique<player>(this->p_white);
+        } else {
+            up_atk = make_unique<player>(this->p_black);
+        }
+        if (m.c_dfd == white) {
+            up_dfd = make_unique<player>(this->p_white);
+        } else {
+            up_dfd = make_unique<player>(this->p_black);
+        }
+        this->_unPlayAtk(up_atk, m);
+        this->_unPlayDfd(up_dfd, m);
+        this->c_sideToMove = !this->c_sideToMove;
+        this->u_halfMoveClock = hi_state.u_halfMoveClock;
+        this->b_enPassantDst = hi_state.b_enPassantDst;
+        if (this->c_sideToMove == black) {
+            this->u_fullMoveCounter--;
+        }
+        this->_alterZob(m);
+        assert(bitPopCount(this->p_white.b_pawn) <= 8);
 }
 
 player &board::playerToMove() {
@@ -357,10 +429,10 @@ void board::_genPawnMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
     const player &p_dfd = this->playerToMove();
     bitboard bb_oldAtks = p_atk.b_pawn;
     bitboard bb_isolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks &= ~bb_isolated;
+    bb_oldAtks = bb_oldAtks & ~bb_isolated;
 
 
-    typedef const array<const reference_wrapper<bitboard>, 6> ptrtype;
+    typedef const array<reference_wrapper<bitboard>, 6> ptrtype;
 
     unique_ptr<ptrtype> up_bbDfd = make_unique<ptrtype>(p_dfd.a_bitboards);
 
@@ -442,7 +514,7 @@ void board::_genPawnMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
                     );
         }
         bb_isolated = bitIsolate(bb_oldAtks);
-        bb_oldAtks &= ~bb_isolated;
+        bb_oldAtks = bb_oldAtks & ~bb_isolated;
     }
 }
 
@@ -460,15 +532,15 @@ void board::_genRookMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
     const player &p_dfd = this->playerToMove();
     bitboard bb_oldAtks = p_atk.b_rook;
     bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks &= ~bb_oldIsolated;
+    bb_oldAtks = bb_oldAtks & ~bb_oldIsolated;
 
     bitboard bb_occupied =_calcOccupied();
     while (bb_oldIsolated) {
         // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
         bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, ROOK);
-        bb_newAtks &= ~bb_friendlies;
+        bb_newAtks = bb_newAtks & ~bb_friendlies;
         bitboard bb_newIsolated = bitIsolate(bb_newAtks);
-        bb_newAtks ^= bb_newIsolated;
+        bb_newAtks &= ~bb_newIsolated;
         while (bb_newIsolated) {
             const piece p_dfd = _square2piece(bb_newIsolated); 
             const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
@@ -483,7 +555,7 @@ void board::_genRookMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
                     bb_dfdOld
                     );
             bb_newIsolated = bitIsolate(bb_newAtks);
-            bb_newAtks ^= bb_newIsolated;
+            bb_newAtks &= ~bb_newIsolated;
         }
         bb_oldIsolated = bitIsolate(bb_oldAtks);
         bb_oldAtks &= ~bb_oldIsolated;
@@ -501,7 +573,7 @@ void board::_genBishopMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) 
         bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, BISHOP); 
         bb_newAtks &= ~bb_friendlies;
         bitboard bb_newIsolated = bitIsolate(bb_newAtks);
-        bb_newAtks ^= bb_newIsolated;
+        bb_newAtks &= ~bb_newIsolated;
         while (bb_newIsolated) {
             const piece p_dfd = _square2piece(bb_newIsolated); 
             const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
@@ -516,7 +588,7 @@ void board::_genBishopMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) 
                     bb_dfdOld
                     );
             bb_newIsolated = bitIsolate(bb_newAtks);
-            bb_newAtks ^= bb_newIsolated;
+            bb_newAtks &= ~bb_newIsolated;
         }
         bb_oldIsolated = bitIsolate(bb_oldAtks);
         bb_oldAtks &= ~bb_oldIsolated;
@@ -531,7 +603,7 @@ void board::_genKnightMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) 
     while (bb_oldIsolated) {
         bitboard bb_newAtks = nShift(bb_oldIsolated) & ~bb_friendlies;
         bitboard bb_newIsolated = bitIsolate(bb_newAtks);
-        bb_newAtks ^= bb_newIsolated;
+        bb_newAtks &= ~bb_newIsolated;
         while (bb_newIsolated) {
             const piece p_dfd = _square2piece(bb_newIsolated); 
             const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
@@ -546,7 +618,7 @@ void board::_genKnightMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) 
                     bb_dfdOld
                     );
             bb_newIsolated = bitIsolate(bb_newAtks);
-            bb_newAtks ^= bb_newIsolated;
+            bb_newAtks &= ~bb_newIsolated;
         }
         bb_oldIsolated = bitIsolate(bb_oldAtks);
         bb_oldAtks &= ~bb_oldIsolated;
@@ -626,11 +698,11 @@ void board::_genKingMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
             v_dst.emplace_back(
                     this->c_sideToMove,
                     KING,
-                    bb_oldIsolated,
-                    d.s_qCastle,
+                    bb_oldIsolated, // atkold
+                    d.s_qCastle, // atknew
                     this->c_sideToMove,
                     ROOK,
-                    d.s_qCastle
+                    d.s_qCastle // dfdold
                     );
         }
         if (d.s_kCastle) {
@@ -651,17 +723,18 @@ void board::_genKingMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
 
 vector<cMove> board::genPseudoLegalMoves() {
     bitboard bb_friendlies = 0;
-    auto a_bbs = playerToMove().a_bitboards;
+    const array<reference_wrapper<bitboard>, 6>
+        a_bbs = this->playerToMove().a_bitboards;
     for (bitboard b : a_bbs) {
         bb_friendlies |= b;
     }
     vector<cMove> v_ret;
-    _genPawnMoves(v_ret, bb_friendlies);
-    _genRookMoves(v_ret, bb_friendlies);
-    _genBishopMoves(v_ret, bb_friendlies);
-    _genKnightMoves(v_ret, bb_friendlies);
-    _genQueenMoves(v_ret, bb_friendlies);
-    _genKingMoves(v_ret, bb_friendlies);
+    this->_genPawnMoves(v_ret, bb_friendlies);
+    this->_genRookMoves(v_ret, bb_friendlies);
+    this->_genBishopMoves(v_ret, bb_friendlies);
+    this->_genKnightMoves(v_ret, bb_friendlies);
+    this->_genQueenMoves(v_ret, bb_friendlies);
+    this->_genKingMoves(v_ret, bb_friendlies);
     return v_ret;
 }
 
@@ -673,6 +746,31 @@ bool board::_isKingInCheck(const colour c) {
         }
     }
     return false;
+}
+
+vector<cMove> _order(const vector<cMove> v_moves) {
+    array<array<vector<cMove>, 7>, 7> v_attacks;
+    // v_attacks[dfd][atk]
+    for (const cMove m : v_moves) {
+        v_attacks.at(m.p_dfd).at(m.p_atk).push_back(m);
+    }
+    vector<cMove> v_ret;
+    for (s16 j = 1; j < 7; j++) {
+        const s16 s = 6 - j;
+        for (u16 i = 0; i < 7; i++) {
+            const vector<cMove> v_tmp = v_attacks.at(s).at(i);
+            for (const cMove m : v_tmp) {
+                v_ret.push_back(m);
+            }
+        }
+    }
+    for (u16 i = 0; i < 7; i++) {
+        const vector<cMove> v_tmp = v_attacks.at(6).at(i);
+        for (const cMove m : v_tmp) {
+            v_ret.push_back(m);
+        }
+    }
+    return v_ret;
 }
 vector<cMove> board::genLegalMoves() {
     vector<cMove> v_ret;
@@ -693,7 +791,7 @@ vector<cMove> board::genLegalMoves() {
         this->unPlayMove();
     }
 
-    return v_ret;
+    return _order(v_ret);
 }
 
 s64 board::_isGameOver() {
@@ -817,7 +915,7 @@ namespace {
     };
 }
 
-s64 board::_evalMat() { 
+s64 board::_evalMat() const {
     // eval white and eval black
     s64 s_ret = 0;
     const array<const s64, 2> a_cWeights = {1, -1};
@@ -833,11 +931,11 @@ s64 board::_evalMat() {
     return s_ret * 100;
 }
 
-s64 board::_evalMov() { 
+s64 board::_evalMov() const {
     return 0;
 }
 
-s64 board::_evalPos() { 
+s64 board::_evalPos() const {
     // eval white and eval black
     s64 s_ret = 0;
     const array<bool, 2> a_cRot = {false, true};
@@ -850,7 +948,7 @@ s64 board::_evalPos() {
             bitboard bb_cur = p.a_bitboards[j];
             while (bb_cur) {
                 square s = bitIsolate(bb_cur);
-                bb_cur ^= s;
+                bb_cur &= ~s;
                 if (b_rot) s = mirror(s);
                 const u16 u_index = square2index(s);
                 s_ret += a_cWeight[i] * a_table[u_index];
@@ -859,5 +957,3 @@ s64 board::_evalPos() {
     }
     return s_ret;
 }
-
-

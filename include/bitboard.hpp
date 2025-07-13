@@ -103,7 +103,7 @@ namespace n_bbd {
         return bb;
     }
 
-    typedef const array<const reference_wrapper<bitboard>, 6> ptrtype;
+    typedef const array<reference_wrapper<bitboard>, 6> ptrtype;
     typedef struct pShiftData {
         square s_fwd = 0;
         square s_fwd2 = 0;

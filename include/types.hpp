@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <atomic>
 
 #pragma once
 using namespace std;
@@ -169,7 +168,10 @@ namespace n_types {
             s_ret += square2string(s_atkNew);
             return s_ret;
         }
+        // 48 bytes (could get aligned to 64)
+        // 384 bits
     }cMove;
+
     inline bool operator==(const n_types::cMove &a, const n_types::cMove &m) {
         return a.c_atk == m.c_atk &&
             a.p_atk == m.p_atk &&

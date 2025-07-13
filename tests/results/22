@@ -1,0 +1,42 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN FAILED
+target:
+r n b q k b n r
+p p p p p p p p
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+P P P P P P P P
+R N B Q K B N R
+side to move: white
+en passant target: none
+half move clock: 0
+full move clock: 1
+actual:
+r n b q k b n r
+p p p p p p p p
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+P P P P P P P P
+R N B Q K B N R
+side to move: white
+en passant target: none
+half move clock: 0
+full move clock: 1
+Game result: game continuing
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 1
+Nodes searched in it 1 22
+Nodes searched in it 2 330
+TEST SEARCH INIT FAILED
+260
+final count 353

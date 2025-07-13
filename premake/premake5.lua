@@ -3,8 +3,8 @@ workspace "ChessBot"
     location ".."
 
 project "ChessBot"
-    buildoptions { "-std=c++20" }
-    sanitize {"Thread", "UndefinedBehavior" }
+    buildoptions { "-std=c++20", "-mcmodel=medium" }
+    sanitize {"Address", "UndefinedBehavior" }
     location "build"
     kind "ConsoleApp"
     language "C++"

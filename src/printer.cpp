@@ -36,7 +36,7 @@ endcheck:
         goto operation;
     }
 
-    void bprint(const board b) {
+    void bprint(board b) {
         cout << b.str() << endl;
     }
 

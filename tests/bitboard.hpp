@@ -3,18 +3,19 @@
 #include "../include/bitboard.hpp"
 #include "./tConsts.hpp"
 
+#pragma once
 namespace n_bb {
     using namespace tConsts;
     bool ret = true;
     string msg = "";
-    bitboard b_empty = 0x0;
-    bitboard b_unary = 0x1;
-    bitboard b_full = 0xffffffffffffffff;
-    bitboard b_light = 0X55aa55aa55aa55aa;
-    bitboard b_dark = 0xaa55aa55aa55aa55;
-    bitboard b_diagAHP = 0x8040201008040201; 
-    bitboard b_diagAHN = 0x0102040810204080;
-    std::vector<bitboard> bitboards = {
+    const bitboard b_empty = 0x0;
+    const bitboard b_unary = 0x1;
+    const bitboard b_full = 0xffffffffffffffff;
+    const bitboard b_light = 0X55aa55aa55aa55aa;
+    const bitboard b_dark = 0xaa55aa55aa55aa55;
+    const bitboard b_diagAHP = 0x8040201008040201; 
+    const bitboard b_diagAHN = 0x0102040810204080;
+    const std::vector<bitboard> bitboards = {
         b_empty,
         b_unary,
         b_full,

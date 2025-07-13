@@ -77,7 +77,7 @@ namespace n_consts {
         'p', 'r', 'b', 'n', 'k', 'q'
     };
 
-    const n_types::cMove m_empty(
+    const n_types::cMove m_empty = {
         black,
         n_types::EMPTY,
         0,
@@ -85,6 +85,5 @@ namespace n_consts {
         black,
         n_types::EMPTY,
         0,
-        0
-        );
+        0};
 }

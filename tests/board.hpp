@@ -30,7 +30,8 @@ namespace n_b {
             "side to move: white" << "\n" <<
             "en passant target: none" << "\n" <<
             "half move clock: 0" << "\n" <<
-            "full move clock: 1" << "\n";
+            "full move clock: 1" << "\n" <<
+            "Game result: game continuing" << "\n";
         string s_cmp = ss_cmp.str();
         msg = "TEST LOAD FEN ";
         ret = s_cmp == s_test;
@@ -51,7 +52,8 @@ namespace n_b {
             "side to move: white" << "\n" <<
             "en passant target: none" << "\n" <<
             "half move clock: 0" << "\n" <<
-            "full move clock: 1" << "\n";
+            "full move clock: 1" << "\n" <<
+            "Game result: game continuing" << "\n";
         s_cmp = ss_cmp.str();
         s_test = b.str();
         ret = s_cmp == s_test;
@@ -102,8 +104,9 @@ end:
             "R N B Q K B N R" << "\n" <<
             "side to move: black" << "\n" <<
             "en passant target: none" << "\n" <<
-            "half move clock: 1" << "\n" <<
-            "full move clock: 1" << "\n";
+            "half move clock: 0" << "\n" <<
+            "full move clock: 1" << "\n" <<
+            "Game result: game continuing" << "\n";
         string s_cmp = ss_cmp.str();
 
         ret = s_cmp == s_test;
@@ -127,8 +130,9 @@ end:
             "R N B Q K B N R" << "\n" <<
             "side to move: white" << "\n" <<
             "en passant target: none" << "\n" <<
-            "half move clock: 2" << "\n" <<
-            "full move clock: 2" << "\n";
+            "half move clock: 0" << "\n" <<
+            "full move clock: 2" << "\n" <<
+            "Game result: game continuing" << "\n";
         s_cmp.erase();
         s_cmp.append(ss_cmp.str());
 end:
@@ -153,14 +157,14 @@ end:
         );
 
         cMove m_w (
-            white,
+                white,
                 e_piece::PAWN,
                 (1 << 11),
                 n_bbd::shiftOne(NORTH, (1 << 11)),
                 white,
                 e_piece::PAWN,
                 0
-        );
+                );
         board b;
         b.loadFen(n_consts::sv_fenStart);
         b.playMove(m_w);
@@ -180,10 +184,11 @@ end:
             "side to move: white" << "\n" <<
             "en passant target: none" << "\n" <<
             "half move clock: 0" << "\n" <<
-            "full move clock: 1" << "\n";
+            "full move clock: 1" << "\n" <<
+            "Game result: game continuing" << "\n";
         string s_cmp = ss_cmp.str();
         ret = s_cmp == s_test;
-        msg = "TEST PLAY MOVE ";
+        msg = "TEST UNPLAY MOVE ";
         if (!ret) {
             eval(ret, msg);
             cout << "target:\n" << s_cmp << "actual:\n" << s_test;
@@ -210,7 +215,8 @@ end:
             "side to move: white" << "\n" <<
             "en passant target: none" << "\n" <<
             "half move clock: 0" << "\n" <<
-            "full move clock: 1" << "\n";
+            "full move clock: 1" << "\n" <<
+            "Game result: game continuing" << "\n";
         s_cmp = ss_cmp.str();
         ret = ret && (s_cmp == s_test);
         eval(ret, msg);

@@ -24,7 +24,7 @@ using namespace n_consts;
         string msg = "TEST SEARCH INIT ";
         tConsts::eval(ret, msg);
         if (!ret) cout << s_eval << "\n";
-        cout << "final count " << n_ctr::au_ctr << "\n";
+        cout << "final count " << n_ctr::au_ctr << endl;
         // cout << "exiting test search init\n";
         return ret;
     }

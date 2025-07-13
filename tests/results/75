@@ -1,0 +1,25 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN SUCCESS
+TEST PLAY MOVE SUCCESS
+TEST UNPLAY MOVE SUCCESS
+TEST GEN MOVE SUCCESS
+TEST LEGAL GEN MOVE SUCCESS
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Nodes searched in it 1 21
+Nodes collision in it 1 15
+Nodes searched in it 2 113
+Nodes collision in it 2 87
+Nodes searched in it 3 576
+Nodes collision in it 3 537
+Nodes searched in it 4 31950
+Nodes collision in it 4 26545
+Nodes searched in it 5 30628
+Nodes collision in it 5 49503
