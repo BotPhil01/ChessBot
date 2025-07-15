@@ -18,7 +18,7 @@ using namespace n_consts;
         board b;
         b.loadFen(sv_fenStart);
         // cout << "running search\n";
-        s64 s_eval = search(b);
+        s64 s_eval = search(b).first;
         // cout << "terminating search\n";
         bool ret = s_eval < 100 && s_eval >= 0;
         string msg = "TEST SEARCH INIT ";
@@ -33,7 +33,7 @@ using namespace n_consts;
         board b;
         b.loadFen("3k4/8/8/8/8/8/8/6QK w - - 0 1");
 
-        s64 s_eval = search(b);
+        s64 s_eval = search(b).first;
 
         bool ret = s_eval > 0;
         string msg = "TEST SEARCH WHITE ";
@@ -49,7 +49,7 @@ using namespace n_consts;
         board b;
         b.loadFen("3K4/8/8/8/8/8/8/6qk w - - 0 1");
 
-        s64 s_eval = search(b);
+        s64 s_eval = search(b).first;
 
         bool ret = s_eval < 0;
         string msg = "TEST SEARCH BLACK ";
@@ -66,7 +66,5 @@ using namespace n_consts;
         return _testSearchInit()
             && _testSearchWhite()
             &&_testSearchBlack();
-            // _testDepthZero() &&
-            // _testSearchEven();
     }
 }

@@ -18,7 +18,7 @@ namespace n_sch {
         qTable t_q;
         entry _e_tmp;
 #define QMAXDEPTH 100
-        evl _quiesce(board b, evl e_alpha, evl e_beta, u32 u_depth) {
+        pair<evl, cMove> _quiesce(board b, evl e_alpha, evl e_beta, u32 u_depth) {
             au_ctr++;
             au_quiDepth = max((u64) au_quiDepth.load(), (u64) QMAXDEPTH - u_depth);
 
@@ -38,22 +38,22 @@ namespace n_sch {
                 au_col++;
                 if (e.n == node::PV) {
                     cout << "QPV\n";
-                    return e.e;
+                    return {e.e, e.m_best};
                 }
                 if (e.n == node::DELTA &&
                         e_alpha >= INT64_MIN + e_delta &&
                         e.e < e_alpha - e_delta) {
                     cout << "QDE\n";
-                    return e.e;
+                    return {e.e, e.m_best};
                 }
                 if (e.n == node::ALL && e.e <= e_alpha) {
                     cout << "QAL\n";
-                    return e.e;
+                    return {e.e, e.m_best};
                 }
                 if (e.n == node::CUT &&
                         e.e >= e_beta) {
                     cout << "QCU\n";
-                    return e.e;
+                    return {e.e, e.m_best};
                 }
             }
 
@@ -70,7 +70,7 @@ namespace n_sch {
                     s_best
                 };
                 t_q.add(_e_tmp);
-                return e_beta;
+                return {e_beta, m_best};
             }
 
             // delta cutoff to save processing power
@@ -87,7 +87,7 @@ namespace n_sch {
                     s_best
                 };
                 t_q.add(_e_tmp);
-                return e_alpha;
+                return {e_alpha, m_best};
             }
 
             if (e_best > e_alpha) {
@@ -101,7 +101,7 @@ namespace n_sch {
                 if (m.isQuiet()) continue;
 
                 b.playMove(m);
-                const evl e_cur = -_quiesce(b, -e_beta, -e_alpha, u_depth-1);
+                const evl e_cur = -_quiesce(b, -e_beta, -e_alpha, u_depth-1).first;
                 const u64 z_cur = b.u_zob;
                 const bSig s_cur = b.sig();
                 b.unPlayMove();
@@ -117,7 +117,7 @@ namespace n_sch {
                         s_cur
                     };
                     t_q.add(_e_tmp);
-                    return e_cur;
+                    return {e_cur, m};
                 }
                 if (e_cur > e_best) {
                     e_best = e_cur;
@@ -142,7 +142,7 @@ namespace n_sch {
                 s_best
             };
             t_q.add(_e_tmp);
-            return e_best;
+            return {e_best, m_best};
         }
 
         pair<evl, cMove> _negamax(
@@ -177,7 +177,7 @@ namespace n_sch {
             u64 z_best = b.u_zob;
             bSig s_best = b.sig();
             if (u_depth == 0) {
-                e_best = _quiesce(b, e_alpha, e_beta, QMAXDEPTH);
+                e_best = _quiesce(b, e_alpha, e_beta, QMAXDEPTH).first;
                 _e_tmp = {
                     z_best,
                     m_best,
@@ -283,16 +283,16 @@ namespace n_sch {
                         i,
                         p_cur.second
                         );
-                cout << "Nodes searched in it " <<
-                    i << " " << au_ctr - u_cum << "\n";
-                cout << "Nodes collision in it " <<
-                    i << " " << au_col - u_col << "\n";
-                cout << "Max quiesce beta " <<
-                    i << " " << au_qBeta << "\n";
-                cout << "Max quiesce delta " <<
-                    i << " " << au_qDelta << "\n";
-                cout << "Max quiesce depth reached " <<
-                    i << " " << au_quiDepth  << endl;
+                // cout << "Nodes searched in it " <<
+                //     i << " " << au_ctr - u_cum << "\n";
+                // cout << "Nodes collision in it " <<
+                //     i << " " << au_col - u_col << "\n";
+                // cout << "Max quiesce beta " <<
+                //     i << " " << au_qBeta << "\n";
+                // cout << "Max quiesce delta " <<
+                //     i << " " << au_qDelta << "\n";
+                // cout << "Max quiesce depth reached " <<
+                //     i << " " << au_quiDepth  << endl;
                 u_col = au_col;
                 u_cum = au_ctr;
                 p_cur = e_ret;
