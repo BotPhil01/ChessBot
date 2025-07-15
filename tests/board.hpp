@@ -238,7 +238,7 @@ end:
         if (!ret) {
             goto end;
         }
-        sv_fen = "PPP5/1q6/8/PPPP4/8/8/PP6/kPK5 b - - 1 1";
+        sv_fen = "PPP5/1q6/8/PPPP4/8/8/PN6/kBK5 b - - 1 1";
         b.loadFen(sv_fen);
         v_moves = b.genPseudoLegalMoves();
 

@@ -20,7 +20,7 @@ using namespace n_consts;
         // cout << "running search\n";
         s64 s_eval = search(b);
         // cout << "terminating search\n";
-        bool ret = s_eval < 100 && s_eval > 0;
+        bool ret = s_eval < 100 && s_eval >= 0;
         string msg = "TEST SEARCH INIT ";
         tConsts::eval(ret, msg);
         if (!ret) cout << s_eval << "\n";

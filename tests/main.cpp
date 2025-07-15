@@ -4,10 +4,10 @@
 #include "search.hpp"
 #include "timer.hpp"
 #include "nodectr.hpp"
-#include "../include/stack.hpp"
-using namespace n_stk;
+// #include "../include/stack.hpp"
+// using namespace n_stk;
 int main() {
-    stIncrease();
+    // stIncrease();
     int sum = 0;
     sum += n_bb::tests();
     sum += n_b::tests();

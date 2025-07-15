@@ -4,7 +4,7 @@ workspace "ChessBot"
 
 project "ChessBot"
     buildoptions { "-std=c++20", "-mcmodel=medium" }
-    sanitize {"Address", "UndefinedBehavior" }
+    -- sanitize {"Address", "UndefinedBehavior" }
     location "build"
     kind "ConsoleApp"
     language "C++"

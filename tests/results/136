@@ -1,0 +1,54 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN SUCCESS
+TEST PLAY MOVE SUCCESS
+TEST UNPLAY MOVE SUCCESS
+TEST GEN MOVE SUCCESS
+TEST LEGAL GEN MOVE SUCCESS
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Max quiesce depth reached 0 0
+Nodes searched in it 1 21
+Nodes collision in it 1 0
+Max quiesce depth reached 1 0
+Nodes searched in it 2 58
+Nodes collision in it 2 0
+Max quiesce depth reached 2 1
+Nodes searched in it 3 541
+Nodes collision in it 3 0
+Max quiesce depth reached 3 1
+Nodes searched in it 4 1305
+Nodes collision in it 4 0
+Max quiesce depth reached 4 1
+Nodes searched in it 5 13281
+Nodes collision in it 5 0
+Max quiesce depth reached 5 1
+Nodes searched in it 6 31284
+Nodes collision in it 6 0
+Max quiesce depth reached 6 1
+TEST SEARCH INIT SUCCESS
+final count 46491
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Max quiesce depth reached 0 1
+Nodes searched in it 1 23
+Nodes collision in it 1 0
+Max quiesce depth reached 1 1
+Nodes searched in it 2 51
+Nodes collision in it 2 0
+Max quiesce depth reached 2 1
+Nodes searched in it 3 624
+Nodes collision in it 3 0
+Max quiesce depth reached 3 1
+Nodes searched in it 4 1225
+Nodes collision in it 4 0
+Max quiesce depth reached 4 1
+Nodes searched in it 5 15096
+Nodes collision in it 5 0
+Max quiesce depth reached 5 1

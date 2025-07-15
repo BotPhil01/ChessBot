@@ -6,8 +6,8 @@
 // iterative deepening
 
 namespace n_sch {
-#define MAXDEPTH 6
-    n_types::evl search(n_brd::board b);
+#define MAXDEPTH 4
+    pair<n_types::evl, n_types::cMove> search(n_brd::board b);
 }
 
 // 0x7fffffffdc30 write of size 8

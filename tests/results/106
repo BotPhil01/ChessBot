@@ -1,0 +1,62 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN SUCCESS
+target:
+r n b q k b n r
+p p p p p p p p
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+x x x P x x x x
+P P P x P P P P
+R N B Q K B N R
+side to move: black
+en passant target: none
+half move clock: 0
+full move clock: 1
+Game result: game continuing
+actual:
+r n b q k b n r
+p p p p p p p p
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+P P P P P P P P
+R N B Q K B N R
+side to move: black
+en passant target: none
+half move clock: 0
+full move clock: 1
+Game result: game continuing
+TEST PLAY MOVE FAILED
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Max quiesce depth reached 0 0
+Nodes searched in it 1 21
+Nodes collision in it 1 15
+Max quiesce depth reached 1 0
+Nodes searched in it 2 59
+Nodes collision in it 2 46
+Max quiesce depth reached 2 0
+Nodes searched in it 3 176
+Nodes collision in it 3 152
+Max quiesce depth reached 3 0
+Nodes searched in it 4 363
+Nodes collision in it 4 248
+Max quiesce depth reached 4 0
+Nodes searched in it 5 2225
+Nodes collision in it 5 1944
+Max quiesce depth reached 5 0
+Nodes searched in it 6 4945
+Nodes collision in it 6 2963
+Max quiesce depth reached 6 0
+TEST SEARCH INIT FAILED
+0
+final count 7790

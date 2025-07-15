@@ -2,6 +2,7 @@
 #include "../include/types.hpp"
 #include "../include/bitboard.hpp"
 #include "./tConsts.hpp"
+#include <vector>
 
 #pragma once
 namespace n_bb {

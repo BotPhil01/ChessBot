@@ -1,10 +1,11 @@
 #include "../include/stack.hpp"
+#include "../include/types.hpp"
 
 #include <sys/resource.h>
 #include <stdio.h>
 namespace n_stk {
     void stIncrease() {
-        const rlim_t rlStack =  1024 * 1024 * 1024 * 8; // 8kb
+        const rlim_t rlStack =  1024UL * 1024UL * 1024UL * 1000; // 8kb
         struct rlimit rl;
 
         u32 result = getrlimit(RLIMIT_STACK, &rl);

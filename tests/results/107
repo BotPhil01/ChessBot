@@ -1,0 +1,107 @@
+TEST POP COUNT SUCCESS
+TEST BIT ISOLATE SUCCESS
+TEST SHIFT ONE SUCCESS
+TEST LOAD FEN SUCCESS
+target:
+r n b q k b n r
+p p p p p p p p
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+x x x P x x x x
+P P P x P P P P
+R N B Q K B N R
+side to move: black
+en passant target: none
+half move clock: 0
+full move clock: 1
+Game result: game continuing
+actual:
+r n b q k b n r
+p p p p p p p p
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+x x x x x x x x
+P P P P P P P P
+R N B Q K B N R
+side to move: black
+en passant target: none
+half move clock: 0
+full move clock: 1
+Game result: game continuing
+TEST PLAY MOVE FAILED
+TEST NCTR SET SUCCESS
+TEST NCTR PREF SUCCESS
+TEST NCTR POSF SUCCESS
+TEST NCTR POS SUCCESS
+TEST NCTR POS SUCCESS
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Max quiesce depth reached 0 0
+Nodes searched in it 1 21
+Nodes collision in it 1 15
+Max quiesce depth reached 1 0
+Nodes searched in it 2 59
+Nodes collision in it 2 46
+Max quiesce depth reached 2 0
+Nodes searched in it 3 176
+Nodes collision in it 3 152
+Max quiesce depth reached 3 0
+Nodes searched in it 4 363
+Nodes collision in it 4 248
+Max quiesce depth reached 4 0
+Nodes searched in it 5 2225
+Nodes collision in it 5 1944
+Max quiesce depth reached 5 0
+Nodes searched in it 6 4945
+Nodes collision in it 6 2963
+Max quiesce depth reached 6 0
+TEST SEARCH INIT SUCCESS
+final count 7790
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Max quiesce depth reached 0 0
+Nodes searched in it 1 23
+Nodes collision in it 1 0
+Max quiesce depth reached 1 0
+Nodes searched in it 2 51
+Nodes collision in it 2 1
+Max quiesce depth reached 2 0
+Nodes searched in it 3 561
+Nodes collision in it 3 274
+Max quiesce depth reached 3 0
+Nodes searched in it 4 1109
+Nodes collision in it 4 295
+Max quiesce depth reached 4 0
+Nodes searched in it 5 12266
+Nodes collision in it 5 9652
+Max quiesce depth reached 5 0
+Nodes searched in it 6 23527
+Nodes collision in it 6 9749
+Max quiesce depth reached 6 0
+TEST SEARCH WHITE SUCCESS
+final count 37538
+Nodes searched in it 0 1
+Nodes collision in it 0 0
+Max quiesce depth reached 0 0
+Nodes searched in it 1 6
+Nodes collision in it 1 0
+Max quiesce depth reached 1 0
+Nodes searched in it 2 34
+Nodes collision in it 2 1
+Max quiesce depth reached 2 0
+Nodes searched in it 3 85
+Nodes collision in it 3 19
+Max quiesce depth reached 3 0
+Nodes searched in it 4 598
+Nodes collision in it 4 272
+Max quiesce depth reached 4 0
+Nodes searched in it 5 2111
+Nodes collision in it 5 609
+Max quiesce depth reached 5 0
+Nodes searched in it 6 12040
+Nodes collision in it 6 9265
+Max quiesce depth reached 6 0
+TEST SEARCH BLACK SUCCESS
+final count 14875

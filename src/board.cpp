@@ -9,8 +9,6 @@
 #include <memory>
 #include <string>
 #include <cassert>
-#include <thread>
-#include <chrono>
 
 // fen consists of
 // piece placement
@@ -26,158 +24,159 @@
 // u8 board::u_halfMoveClock = 0;
 // u64 board::u_fullMoveCounter = 0;
 
-using namespace n_brd;
-using namespace n_types;
-using namespace n_bbd;
-using namespace n_rnd;
-board::board() {}
+namespace n_brd {
+    using namespace n_types;
+    using namespace n_bbd;
+    using namespace n_rnd;
 
-string board::_pos2string() const {
-    const u8 u_bbDimension = 8;
-    string s_working = "";
-    const string s_separator = " ";
-    bitboard mask = 1;
+    board::board() {}
 
-    // want to read each row 
-    for (u8 u_row = 0; u_row < u_bbDimension; u_row++) {
-        string s_row = "";
-        for (u8 u_col = 0; u_col < u_bbDimension; u_col++) {
-            const char c = this->_getChar(mask);
-            s_row += c;
-            if (u_col == u_bbDimension - 1) {
-                s_row += '\n';
-            } else {
-                s_row += s_separator;
+    string board::_pos2string() const {
+        const u8 u_bbDimension = 8;
+        string s_working = "";
+        const string s_separator = " ";
+        bitboard mask = 1;
+
+        // want to read each row 
+        for (u8 u_row = 0; u_row < u_bbDimension; u_row++) {
+            string s_row = "";
+            for (u8 u_col = 0; u_col < u_bbDimension; u_col++) {
+                const char c = this->_getChar(mask);
+                s_row += c;
+                if (u_col == u_bbDimension - 1) {
+                    s_row += '\n';
+                } else {
+                    s_row += s_separator;
+                }
+                mask = mask << 1;
             }
-            mask = mask << 1;
+            s_working = s_row + s_working;
         }
-        s_working = s_row + s_working;
+        return s_working;
     }
-    return s_working;
-}
 
-string board::_data2string() {
-    string s = "";
-    s += "side to move: ";
-    s += col2string(this->c_sideToMove) ;
-    s += "\n";
-    s += "en passant target: ";
-    s += square2string(this->b_enPassantDst);
-    s += "\n";
-    s += "half move clock: ";
-    s += (char) (this->u_halfMoveClock + '0');
-    s += "\n";
-    s += "full move clock: ";
-    s += to_string(this->u_fullMoveCounter);
-    s += "\n";
-    s64 s_overCode = this->_isGameOver();
-    s+= "Game result: ";
-    switch (s_overCode) {
-        case FIDDY:
-            s += "stalemate 50 move rule";
-            break;
-        case STALEMATE:
-            s += "stalemate no legal moves";
-            break;
-        case white:
-            s += "white win";
-            break;
-        case black:
-            s += "black win";
-            break;
-        default:
-            s += "game continuing";
+    string board::_data2string() {
+        string s = "";
+        s += "side to move: ";
+        s += col2string(this->c_sideToMove) ;
+        s += "\n";
+        s += "en passant target: ";
+        s += square2string(this->b_enPassantDst);
+        s += "\n";
+        s += "half move clock: ";
+        s += (char) (this->u_halfMoveClock + '0');
+        s += "\n";
+        s += "full move clock: ";
+        s += to_string(this->u_fullMoveCounter);
+        s += "\n";
+        s64 s_overCode = this->isGameOver();
+        s+= "Game result: ";
+        switch (s_overCode) {
+            case FIDDY:
+                s += "stalemate 50 move rule";
+                break;
+            case STALEMATE:
+                s += "stalemate no legal moves";
+                break;
+            case white:
+                s += "white win";
+                break;
+            case black:
+                s += "black win";
+                break;
+            default:
+                s += "game continuing";
+        }
+        s+= "\n";
+        return s;
     }
-    s+= "\n";
-    return s;
-}
 
-string board::str() {
-    std::string s;
-    s += this->_pos2string();
-    s += this->_data2string();
-    return s;
-}
+    string board::str() {
+        std::string s;
+        s += this->_pos2string();
+        s += this->_data2string();
+        return s;
+    }
 
-char board::_getChar(const bitboard mask) const {
-    for (u8 i = 0; i < p_white.a_bitboards.size(); i++) {
-        const bitboard b_w = p_white.a_bitboards[i];
-        const bitboard b_b = p_black.a_bitboards[i];
-        if ((b_w & mask) != 0) {
-            return n_consts::sv_fenWPieces[i];
-        } else if ((b_b & mask) != 0) {
-            return n_consts::sv_fenBPieces[i];
+    char board::_getChar(const bitboard mask) const {
+        for (u8 i = 0; i < p_white.a_bitboards.size(); i++) {
+            const bitboard b_w = p_white.a_bitboards[i];
+            const bitboard b_b = p_black.a_bitboards[i];
+            if ((b_w & mask) != 0) {
+                return n_consts::sv_fenWPieces[i];
+            } else if ((b_b & mask) != 0) {
+                return n_consts::sv_fenBPieces[i];
+            }
+        }
+        return 'x';
+    }
+
+    void board::_parsePP(string_view sv_pp) {
+        // zero boards
+        // cout << this <<"\n";
+        // cout << &this->p_white.a_bitboards[0].get() <<"\n";
+        // cout << &this->p_black.a_bitboards[0].get() <<endl;
+        // using namespace chrono_literals;
+        // this_thread::sleep_for(5000ms);
+        for (u8 i = 0; i < this->p_white.a_bitboards.size(); i++) {
+            this->p_white.a_bitboards.at(i).get() = 0;
+            this->p_black.a_bitboards.at(i).get() = 0;
+        }
+        // assign boards
+        for (u64 u_row = 0; u_row < 8; u_row++) {
+            const string_view sv_part = _isolateEndFenPart(sv_pp, "/");
+            u64 u_col = 0;
+            for (auto it = sv_part.begin(); it != sv_part.end(); it++) {
+                const char c = *it;
+                if (isdigit(c)) {
+                    u_col += (u64) (c - '0');
+                    continue;
+                }
+
+                const u64 u_shift = 8 * u_row + u_col;
+                const bitboard bb_mask = ((u64) 1) << u_shift;
+                const piece p = piece2Index(c);
+                if (isupper(c)) {
+                    this->p_white.a_bitboards[p] |= bb_mask;
+                } else {
+                    this->p_black.a_bitboards[p] |= bb_mask;
+                }
+                u_col++;
+            }
         }
     }
-    return 'x';
-}
 
-void board::_parsePP(string_view sv_pp) {
-    // zero boards
-    // cout << this <<"\n";
-    // cout << &this->p_white.a_bitboards[0].get() <<"\n";
-    // cout << &this->p_black.a_bitboards[0].get() <<endl;
-    // using namespace chrono_literals;
-    // this_thread::sleep_for(5000ms);
-    for (u8 i = 0; i < this->p_white.a_bitboards.size(); i++) {
-        this->p_white.a_bitboards.at(i).get() = 0;
-        this->p_black.a_bitboards.at(i).get() = 0;
+    void board::_parseSTM(string_view sv_pp) {
+        if (sv_pp.front() == 'w') {
+            this->c_sideToMove = white;
+        } else {
+            this->c_sideToMove = black;
+        }
     }
-    // assign boards
-    for (u64 u_row = 0; u_row < 8; u_row++) {
-        const string_view sv_part = _isolateEndFenPart(sv_pp, "/");
-        u64 u_col = 0;
-        for (auto it = sv_part.begin(); it != sv_part.end(); it++) {
-            const char c = *it;
-            if (isdigit(c)) {
-                u_col += (u64) (c - '0');
-                continue;
+
+    void board::_parseCA(string_view sv_pp) {
+        this->p_white.b_kCastle = false;
+        this->p_white.b_qCastle = false;
+        this->p_black.b_kCastle = false;
+        this->p_black.b_qCastle = false;
+        for (auto it = sv_pp.begin(); it != sv_pp.end(); it++) {
+            switch (*it) {
+                case 'K':
+                    this->p_white.b_kCastle = true;
+                    break;
+                case 'Q':
+                    this->p_white.b_qCastle = true;
+                    break;
+                case 'k':
+                    this->p_black.b_kCastle = true;
+                    break;
+                case 'q':
+                    this->p_black.b_qCastle = true;
+                    break;
             }
 
-            const u64 u_shift = 8 * u_row + u_col;
-            const bitboard bb_mask = ((u64) 1) << u_shift;
-            const piece p = piece2Index(c);
-            if (isupper(c)) {
-                this->p_white.a_bitboards[p] |= bb_mask;
-            } else {
-                this->p_black.a_bitboards[p] |= bb_mask;
-            }
-            u_col++;
         }
     }
-}
-
-void board::_parseSTM(string_view sv_pp) {
-    if (sv_pp.front() == 'w') {
-        this->c_sideToMove = white;
-    } else {
-        this->c_sideToMove = black;
-    }
-}
-
-void board::_parseCA(string_view sv_pp) {
-    this->p_white.b_kCastle = false;
-    this->p_white.b_qCastle = false;
-    this->p_black.b_kCastle = false;
-    this->p_black.b_qCastle = false;
-    for (auto it = sv_pp.begin(); it != sv_pp.end(); it++) {
-        switch (*it) {
-            case 'K':
-                this->p_white.b_kCastle = true;
-                break;
-            case 'Q':
-                this->p_white.b_qCastle = true;
-                break;
-            case 'k':
-                this->p_black.b_kCastle = true;
-                break;
-            case 'q':
-                this->p_black.b_qCastle = true;
-                break;
-        }
-
-    }
-}
 
     void board::_parseEP(string_view sv_pp) {
         u64 u_col = 0;
@@ -260,39 +259,42 @@ void board::_parseCA(string_view sv_pp) {
      * @param s_new = square to be added
      */
     void board::_extractBitboardAndAlter(
-            unique_ptr<player> &p,
+            player &p,
             const piece p_bbIndex,
             const square s_old,
             const square s_new) {
-        assert(p != nullptr);
+        // assert(p != nullptr);
         if (p_bbIndex == EMPTY) return;
-        bitboard &b = p->a_bitboards.at(p_bbIndex);
+        bitboard &b = p.a_bitboards.at(p_bbIndex);
+        // want to stop the case where the inputs are poorly formed
+        // if this will do nothing
+        // nothing happens when b == s_old && b == s_new
+        assert(b != s_old || b != s_new);
+        const bitboard b_cache = b;
         // remove old
         b = b & ~s_old;
         // add new
         b = b | s_new;
-        assert(bitPopCount(this->p_white.b_pawn) <= 8);
-        assert(bitPopCount(this->p_black.b_pawn) <= 8);
-        assert(bitPopCount(b) <= 8);
+        this->assValid();
     }
 
-    void board::_playAtk(unique_ptr<player> &p, const cMove &m) {
-        if (p == nullptr) return;
+    void board::_playAtk(player &p, const cMove &m) {
+        // if (p == nullptr) return;
         this->_extractBitboardAndAlter(p, m.p_atk, m.s_atkOld, m.s_atkNew);
     }
 
-    void board::_playDfd(unique_ptr<player> &p, const cMove &m) {
-        if (p == nullptr) return;
+    void board::_playDfd(player &p, const cMove &m) {
+        // if (p == nullptr) return;
         this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdOld, m.s_dfdNew);
     }
 
-    void board::_unPlayAtk(unique_ptr<player> &p, const cMove &m) {
-        if (p == nullptr) return;
+    void board::_unPlayAtk(player &p, const cMove &m) {
+        // if (p == nullptr) return;
         this->_extractBitboardAndAlter(p, m.p_atk, m.s_atkNew, m.s_atkOld);
     }
 
-    void board::_unPlayDfd(unique_ptr<player> &p, const cMove &m) {
-        if (p == nullptr) return;
+    void board::_unPlayDfd(player &p, const cMove &m) {
+        // if (p == nullptr) return;
         this->_extractBitboardAndAlter(p, m.p_dfd, m.s_dfdNew, m.s_dfdOld);
     }
 
@@ -330,7 +332,7 @@ void board::_parseCA(string_view sv_pp) {
             u_index *= p_dfd * u_cMul;
             this->u_zob ^= a_rands[u_index];
         }
-        
+
         // ep
         const array<u32, 8> a_enPassant = {
             56, 57, 58, 59, 
@@ -346,20 +348,10 @@ void board::_parseCA(string_view sv_pp) {
     }
 
     void board::playMove(const cMove m) {
-        unique_ptr<player> up_atk = nullptr;
-        unique_ptr<player> up_dfd = nullptr;
-        if (m.c_atk == white) {
-            up_atk = make_unique<player>(this->p_white);
-        } else {
-            up_atk = make_unique<player>(this->p_black);
-        }
-        if (m.c_dfd == white) {
-            up_dfd = make_unique<player>(this->p_white);
-        } else {
-            up_dfd = make_unique<player>(this->p_black);
-        }
-        this->_playAtk(up_atk, m);
-        this->_playDfd(up_dfd, m);
+        player &p_atk = (m.c_atk == white) ? this->p_white : this->p_black;
+        player &p_dfd = (m.c_dfd == white) ? this->p_white : this->p_black;
+        this->_playAtk(p_atk, m);
+        this->_playDfd(p_dfd, m);
         this->c_sideToMove = !this->c_sideToMove;
         this->s_moveHistory.push({
                 .m = m,
@@ -380,20 +372,10 @@ void board::_parseCA(string_view sv_pp) {
         const hisItem hi_state = this->s_moveHistory.top();
         const cMove m = hi_state.m;
         this->s_moveHistory.pop();
-        unique_ptr<player> up_atk = nullptr;
-        unique_ptr<player> up_dfd = nullptr;
-        if (m.c_atk == white) {
-            up_atk = make_unique<player>(this->p_white);
-        } else {
-            up_atk = make_unique<player>(this->p_black);
-        }
-        if (m.c_dfd == white) {
-            up_dfd = make_unique<player>(this->p_white);
-        } else {
-            up_dfd = make_unique<player>(this->p_black);
-        }
-        this->_unPlayAtk(up_atk, m);
-        this->_unPlayDfd(up_dfd, m);
+        player &p_atk = (m.c_atk == white) ? this->p_white : this->p_black;
+        player &p_dfd = (m.c_dfd == white) ? this->p_white : this->p_black;
+        this->_unPlayAtk(p_atk, m);
+        this->_unPlayDfd(p_dfd, m);
         this->c_sideToMove = !this->c_sideToMove;
         this->u_halfMoveClock = hi_state.u_halfMoveClock;
         this->b_enPassantDst = hi_state.b_enPassantDst;
@@ -401,243 +383,176 @@ void board::_parseCA(string_view sv_pp) {
             this->u_fullMoveCounter--;
         }
         this->_alterZob(m);
-        assert(bitPopCount(this->p_white.b_pawn) <= 8);
-}
-
-player &board::playerToMove() {
-    return (this->c_sideToMove == white) ? p_white : p_black;
-}
-
-player &board::playerToWatch() {
-    return (this->c_sideToMove == white) ? p_black : p_white;
-}
-
-// search enemy square for piece type
-piece board::_square2piece(const square s) {
-    for (player p_dfd : {p_white, p_black}) {
-        // player p_dfd = this->playerToWatch();
-        auto a_bbs = p_dfd.a_bitboards;
-        for (u8 i = 0; i < a_bbs.size(); i++) {
-            if (a_bbs[i] & s) return a_pieces[i];
-        }
     }
-    return EMPTY;
-}
 
-void board::_genPawnMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
-    const player &p_atk = this->playerToMove();
-    const player &p_dfd = this->playerToMove();
-    bitboard bb_oldAtks = p_atk.b_pawn;
-    bitboard bb_isolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks = bb_oldAtks & ~bb_isolated;
+    player &board::playerToMove() {
+        return (this->c_sideToMove == white) ? p_white : p_black;
+    }
 
+    player &board::playerToWatch() {
+        return (this->c_sideToMove == white) ? p_black : p_white;
+    }
 
-    typedef const array<reference_wrapper<bitboard>, 6> ptrtype;
-
-    unique_ptr<ptrtype> up_bbDfd = make_unique<ptrtype>(p_dfd.a_bitboards);
-
-    while (bb_isolated) {
-        const pShiftData d = pShift(
-                bb_isolated,
-                this->c_sideToMove,
-                this->b_enPassantDst,
-                up_bbDfd);
-        if (d.s_fwd && independent(d.s_fwd, bb_friendlies)) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    PAWN,
-                    bb_isolated,
-                    d.s_fwd,
-                    this->c_sideToMove,
-                    EMPTY,
-                    0
-                    );
+    // search enemy square for piece type
+    piece board::_square2piece(const square s) {
+        for (player p_dfd : {p_white, p_black}) {
+            // player p_dfd = this->playerToWatch();
+            const array<reference_wrapper<bitboard>, 6> a_bbs = p_dfd.a_bitboards;
+            for (u8 i = 0; i < a_bbs.size(); i++) {
+                const bitboard b = a_bbs[i].get();
+                if (b & s) return a_pieces[i];
+            }
         }
+        return EMPTY;
+    }
 
-        if (d.s_fwd2 && independent(bb_friendlies, d.s_fwd2)) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    PAWN,
-                    bb_isolated,
-                    d.s_fwd2,
-                    this->c_sideToMove,
-                    EMPTY,
-                    0
-                    );
-        }
-
-        if (d.s_eCap && independent(bb_friendlies, d.s_eCap)) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    PAWN,
-                    bb_isolated,
-                    d.s_eCap,
-                    !this->c_sideToMove,
-                    _square2piece(d.s_eCap),
-                    d.s_eCap
-                    );
-        }
-
-        if (d.s_wCap && independent(bb_friendlies, d.s_wCap)) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    PAWN,
-                    bb_isolated,
-                    d.s_wCap,
-                    !this->c_sideToMove,
-                    _square2piece(d.s_wCap),
-                    d.s_wCap
-                    );
-        }
-
-        if (d.s_eep) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    PAWN,
-                    bb_isolated,
-                    d.s_eep,
-                    !this->c_sideToMove,
-                    PAWN,
-                    this->b_enPassantDst
-                    );
-        }
-
-        if (d.s_eep) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    PAWN,
-                    bb_isolated,
-                    d.s_eep,
-                    !this->c_sideToMove,
-                    PAWN,
-                    this->b_enPassantDst
-                    );
-        }
-        bb_isolated = bitIsolate(bb_oldAtks);
+    void board::_genPawnMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
+        const player &p_atk = this->playerToMove();
+        const player &p_dfd = this->playerToWatch();
+        bitboard bb_oldAtks = p_atk.b_pawn;
+        bitboard bb_isolated = bitIsolate(bb_oldAtks);
         bb_oldAtks = bb_oldAtks & ~bb_isolated;
-    }
-}
 
-bitboard board::_calcOccupied() const {
-    bitboard bb_ret = 0;
-    for (u8 i = 0; i < this->p_white.a_bitboards.size(); i++) {
-        bb_ret |= this->p_white.a_bitboards[i];
-        bb_ret |= this->p_black.a_bitboards[i];
-    }
-    return bb_ret;
-}
+        typedef const array<reference_wrapper<bitboard>, 6> ptrtype;
 
-void board::_genRookMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
-    const player &p_atk = this->playerToMove();
-    const player &p_dfd = this->playerToMove();
-    bitboard bb_oldAtks = p_atk.b_rook;
-    bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks = bb_oldAtks & ~bb_oldIsolated;
+        unique_ptr<ptrtype> up_bbDfd = make_unique<ptrtype>(p_dfd.a_bitboards);
 
-    bitboard bb_occupied =_calcOccupied();
-    while (bb_oldIsolated) {
-        // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
-        bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, ROOK);
-        bb_newAtks = bb_newAtks & ~bb_friendlies;
-        bitboard bb_newIsolated = bitIsolate(bb_newAtks);
-        bb_newAtks &= ~bb_newIsolated;
-        while (bb_newIsolated) {
-            const piece p_dfd = _square2piece(bb_newIsolated); 
-            const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
-            const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
-            v_dst.emplace_back(
+        while (bb_isolated) {
+            const pShiftData d = pShift(
+                    bb_isolated,
                     this->c_sideToMove,
-                    ROOK,
-                    bb_oldIsolated,
-                    bb_newIsolated,
-                    c_dfd,
-                    p_dfd,
-                    bb_dfdOld
-                    );
-            bb_newIsolated = bitIsolate(bb_newAtks);
-            bb_newAtks &= ~bb_newIsolated;
+                    this->b_enPassantDst,
+                    up_bbDfd);
+
+            if (d.s_fwd && independent(d.s_fwd, bb_friendlies)) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        PAWN,
+                        bb_isolated,
+                        d.s_fwd,
+                        this->c_sideToMove,
+                        EMPTY,
+                        0
+                        );
+            }
+
+            if (d.s_fwd2 && independent(bb_friendlies, d.s_fwd2)) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        PAWN,
+                        bb_isolated,
+                        d.s_fwd2,
+                        this->c_sideToMove,
+                        EMPTY,
+                        0
+                        );
+            }
+
+            if (d.s_eCap && independent(bb_friendlies, d.s_eCap)) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        PAWN,
+                        bb_isolated,
+                        d.s_eCap,
+                        !this->c_sideToMove,
+                        _square2piece(d.s_eCap),
+                        d.s_eCap
+                        );
+            }
+
+            if (d.s_wCap && independent(bb_friendlies, d.s_wCap)) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        PAWN,
+                        bb_isolated,
+                        d.s_wCap,
+                        !this->c_sideToMove,
+                        _square2piece(d.s_wCap),
+                        d.s_wCap
+                        );
+            }
+
+            if (d.s_eep) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        PAWN,
+                        bb_isolated,
+                        d.s_eep,
+                        !this->c_sideToMove,
+                        PAWN,
+                        this->b_enPassantDst
+                        );
+            }
+
+            if (d.s_eep) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        PAWN,
+                        bb_isolated,
+                        d.s_eep,
+                        !this->c_sideToMove,
+                        PAWN,
+                        this->b_enPassantDst
+                        );
+            }
+            bb_isolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks = bb_oldAtks & ~bb_isolated;
         }
-        bb_oldIsolated = bitIsolate(bb_oldAtks);
-        bb_oldAtks &= ~bb_oldIsolated;
     }
-}
-void board::_genBishopMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
-    const player &p_atk = this->playerToMove();
-    bitboard bb_oldAtks = p_atk.b_bishop;
-    bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks &= ~bb_oldIsolated;
 
-    bitboard bb_occupied =_calcOccupied();
-    while (bb_oldIsolated) {
-        // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, BISHOP) & ~bb_friendlies;
-        bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, BISHOP); 
-        bb_newAtks &= ~bb_friendlies;
-        bitboard bb_newIsolated = bitIsolate(bb_newAtks);
-        bb_newAtks &= ~bb_newIsolated;
-        while (bb_newIsolated) {
-            const piece p_dfd = _square2piece(bb_newIsolated); 
-            const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
-            const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    BISHOP,
-                    bb_oldIsolated,
-                    bb_newIsolated,
-                    c_dfd,
-                    p_dfd,
-                    bb_dfdOld
-                    );
-            bb_newIsolated = bitIsolate(bb_newAtks);
-            bb_newAtks &= ~bb_newIsolated;
+    bitboard board::_calcOccupied() const {
+        bitboard bb_ret = 0;
+        for (u8 i = 0; i < this->p_white.a_bitboards.size(); i++) {
+            bb_ret |= this->p_white.a_bitboards[i];
+            bb_ret |= this->p_black.a_bitboards[i];
         }
-        bb_oldIsolated = bitIsolate(bb_oldAtks);
-        bb_oldAtks &= ~bb_oldIsolated;
+        return bb_ret;
     }
-}
-void board::_genKnightMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
-    const player &p_atk = this->playerToMove();
-    bitboard bb_oldAtks = p_atk.b_knight;
-    bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks &= ~bb_oldIsolated;
 
-    while (bb_oldIsolated) {
-        bitboard bb_newAtks = nShift(bb_oldIsolated) & ~bb_friendlies;
-        bitboard bb_newIsolated = bitIsolate(bb_newAtks);
-        bb_newAtks &= ~bb_newIsolated;
-        while (bb_newIsolated) {
-            const piece p_dfd = _square2piece(bb_newIsolated); 
-            const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
-            const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    KNIGHT,
-                    bb_oldIsolated,
-                    bb_newIsolated,
-                    c_dfd,
-                    p_dfd,
-                    bb_dfdOld
-                    );
-            bb_newIsolated = bitIsolate(bb_newAtks);
+    void board::_genRookMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
+        const player &p_atk = this->playerToMove();
+        const player &p_dfd = this->playerToWatch();
+        bitboard bb_oldAtks = p_atk.b_rook;
+        bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
+        bb_oldAtks = bb_oldAtks & ~bb_oldIsolated;
+
+        bitboard bb_occupied =_calcOccupied();
+        while (bb_oldIsolated) {
+            // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, ROOK) & ~bb_friendlies;
+            bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, ROOK);
+            bb_newAtks = bb_newAtks & ~bb_friendlies;
+            bitboard bb_newIsolated = bitIsolate(bb_newAtks);
             bb_newAtks &= ~bb_newIsolated;
+            while (bb_newIsolated) {
+                const piece pi_dfd = _square2piece(bb_newIsolated); 
+                const colour c_dfd = pi_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
+                const bitboard bb_dfdOld = pi_dfd == EMPTY ? 0 : bb_newIsolated;
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        ROOK,
+                        bb_oldIsolated,
+                        bb_newIsolated,
+                        c_dfd,
+                        pi_dfd,
+                        bb_dfdOld
+                        );
+                bb_newIsolated = bitIsolate(bb_newAtks);
+                bb_newAtks &= ~bb_newIsolated;
+            }
+            bb_oldIsolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks &= ~bb_oldIsolated;
         }
-        bb_oldIsolated = bitIsolate(bb_oldAtks);
-        bb_oldAtks &= ~bb_oldIsolated;
     }
-}
+    void board::_genBishopMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
+        const player &p_atk = this->playerToMove();
+        bitboard bb_oldAtks = p_atk.b_bishop;
+        bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
+        bb_oldAtks &= ~bb_oldIsolated;
 
-void board::_genQueenMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
-    const player &p_atk = this->playerToMove();
-    bitboard bb_oldAtks = p_atk.b_queen;
-    bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks &= ~bb_oldIsolated;
-
-    const bitboard bb_occupied =_calcOccupied();
-    while (bb_oldIsolated) {
-        for (const piece p_mask : {BISHOP, ROOK}) {
-            bitboard bb_newAtks = n_sld::lookup(
-                    bb_oldIsolated,
-                    bb_occupied,
-                    p_mask);
+        bitboard bb_occupied =_calcOccupied();
+        while (bb_oldIsolated) {
+            // bitboard bb_newAtks = n_mgc::lookup(bb_oldIsolated, bb_occupied, BISHOP) & ~bb_friendlies;
+            bitboard bb_newAtks = n_sld::lookup(bb_oldIsolated, bb_occupied, BISHOP); 
             bb_newAtks &= ~bb_friendlies;
             bitboard bb_newIsolated = bitIsolate(bb_newAtks);
             bb_newAtks &= ~bb_newIsolated;
@@ -647,7 +562,7 @@ void board::_genQueenMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
                 const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
                 v_dst.emplace_back(
                         this->c_sideToMove,
-                        QUEEN,
+                        BISHOP,
                         bb_oldIsolated,
                         bb_newIsolated,
                         c_dfd,
@@ -657,303 +572,479 @@ void board::_genQueenMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
                 bb_newIsolated = bitIsolate(bb_newAtks);
                 bb_newAtks &= ~bb_newIsolated;
             }
+            bb_oldIsolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks &= ~bb_oldIsolated;
         }
-        bb_oldIsolated = bitIsolate(bb_oldAtks);
+    }
+    void board::_genKnightMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
+        const player &p_atk = this->playerToMove();
+        bitboard bb_oldAtks = p_atk.b_knight;
+        bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
         bb_oldAtks &= ~bb_oldIsolated;
+
+        while (bb_oldIsolated) {
+            bitboard bb_newAtks = nShift(bb_oldIsolated) & ~bb_friendlies;
+            bitboard bb_newIsolated = bitIsolate(bb_newAtks);
+            bb_newAtks &= ~bb_newIsolated;
+            while (bb_newIsolated) {
+                const piece p_dfd = _square2piece(bb_newIsolated); 
+                const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
+                const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        KNIGHT,
+                        bb_oldIsolated,
+                        bb_newIsolated,
+                        c_dfd,
+                        p_dfd,
+                        bb_dfdOld
+                        );
+                bb_newIsolated = bitIsolate(bb_newAtks);
+                bb_newAtks &= ~bb_newIsolated;
+            }
+            bb_oldIsolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks &= ~bb_oldIsolated;
+        }
     }
-}
 
-void board::_genKingMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
-    const player &p_atk = this->playerToMove();
-    bitboard bb_oldAtks = p_atk.b_king;
-    bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
-    bb_oldAtks &= ~bb_oldIsolated;
-
-    const bitboard bb_occupied =_calcOccupied();
-    while (bb_oldIsolated) {
-        kShiftData d = kShift(
-                bb_oldIsolated,
-                this->c_sideToMove,
-                p_atk.b_kCastle,
-                p_atk.b_qCastle,
-                bb_occupied);
-
-        for (bitboard bb_newIsolated : d.a_quiets) {
-            if ((bb_friendlies & bb_newIsolated) || (bb_newIsolated == 0)) continue;
-            const piece p_dfd = _square2piece(bb_newIsolated); 
-            const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
-            const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    KING,
-                    bb_oldIsolated,
-                    bb_newIsolated,
-                    c_dfd,
-                    p_dfd,
-                    bb_dfdOld
-                    );
-        }
-
-        if (d.s_qCastle) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    KING,
-                    bb_oldIsolated, // atkold
-                    d.s_qCastle, // atknew
-                    this->c_sideToMove,
-                    ROOK,
-                    d.s_qCastle // dfdold
-                    );
-        }
-        if (d.s_kCastle) {
-            v_dst.emplace_back(
-                    this->c_sideToMove,
-                    KING,
-                    bb_oldIsolated,
-                    d.s_kCastle,
-                    this->c_sideToMove,
-                    ROOK,
-                    d.s_kCastle
-                    );
-        }
-        bb_oldIsolated = bitIsolate(bb_oldAtks);
+    void board::_genQueenMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
+        const player &p_atk = this->playerToMove();
+        bitboard bb_oldAtks = p_atk.b_queen;
+        bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
         bb_oldAtks &= ~bb_oldIsolated;
-    }
-}
 
-vector<cMove> board::genPseudoLegalMoves() {
-    bitboard bb_friendlies = 0;
-    const array<reference_wrapper<bitboard>, 6>
-        a_bbs = this->playerToMove().a_bitboards;
-    for (bitboard b : a_bbs) {
-        bb_friendlies |= b;
-    }
-    vector<cMove> v_ret;
-    this->_genPawnMoves(v_ret, bb_friendlies);
-    this->_genRookMoves(v_ret, bb_friendlies);
-    this->_genBishopMoves(v_ret, bb_friendlies);
-    this->_genKnightMoves(v_ret, bb_friendlies);
-    this->_genQueenMoves(v_ret, bb_friendlies);
-    this->_genKingMoves(v_ret, bb_friendlies);
-    return v_ret;
-}
-
-bool board::_isKingInCheck(const colour c) {
-    const vector<cMove> moves = this->genPseudoLegalMoves();
-    for (const cMove m : moves) {
-        if (m.p_dfd == KING && m.c_dfd == c) {
-            return true;
+        const bitboard bb_occupied =_calcOccupied();
+        while (bb_oldIsolated) {
+            for (const piece p_mask : {BISHOP, ROOK}) {
+                bitboard bb_newAtks = n_sld::lookup(
+                        bb_oldIsolated,
+                        bb_occupied,
+                        p_mask);
+                bb_newAtks &= ~bb_friendlies;
+                bitboard bb_newIsolated = bitIsolate(bb_newAtks);
+                bb_newAtks &= ~bb_newIsolated;
+                while (bb_newIsolated) {
+                    const piece p_dfd = _square2piece(bb_newIsolated); 
+                    const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
+                    const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
+                    v_dst.emplace_back(
+                            this->c_sideToMove,
+                            QUEEN,
+                            bb_oldIsolated,
+                            bb_newIsolated,
+                            c_dfd,
+                            p_dfd,
+                            bb_dfdOld
+                            );
+                    bb_newIsolated = bitIsolate(bb_newAtks);
+                    bb_newAtks &= ~bb_newIsolated;
+                }
+            }
+            bb_oldIsolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks &= ~bb_oldIsolated;
         }
     }
-    return false;
-}
 
-vector<cMove> _order(const vector<cMove> v_moves) {
-    array<array<vector<cMove>, 7>, 7> v_attacks;
-    // v_attacks[dfd][atk]
-    for (const cMove m : v_moves) {
-        v_attacks.at(m.p_dfd).at(m.p_atk).push_back(m);
+    void board::_genKingMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
+        const player &p_atk = this->playerToMove();
+        bitboard bb_oldAtks = p_atk.b_king;
+        bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
+        bb_oldAtks &= ~bb_oldIsolated;
+
+        const bitboard bb_occupied =_calcOccupied();
+        while (bb_oldIsolated) {
+            kShiftData d = kShift(
+                    bb_oldIsolated,
+                    this->c_sideToMove,
+                    p_atk.b_kCastle,
+                    p_atk.b_qCastle,
+                    bb_occupied);
+
+            for (bitboard bb_newIsolated : d.a_quiets) {
+                if ((bb_friendlies & bb_newIsolated) || (bb_newIsolated == 0)) continue;
+                const piece p_dfd = _square2piece(bb_newIsolated); 
+                const colour c_dfd = p_dfd == EMPTY ? this->c_sideToMove : !this->c_sideToMove;
+                const bitboard bb_dfdOld = p_dfd == EMPTY ? 0 : bb_newIsolated;
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        KING,
+                        bb_oldIsolated,
+                        bb_newIsolated,
+                        c_dfd,
+                        p_dfd,
+                        bb_dfdOld
+                        );
+            }
+
+            if (d.s_qCastle) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        KING,
+                        bb_oldIsolated, // atkold
+                        d.s_qCastle, // atknew
+                        this->c_sideToMove,
+                        ROOK,
+                        d.s_qCastle // dfdold
+                        );
+            }
+            if (d.s_kCastle) {
+                v_dst.emplace_back(
+                        this->c_sideToMove,
+                        KING,
+                        bb_oldIsolated,
+                        d.s_kCastle,
+                        this->c_sideToMove,
+                        ROOK,
+                        d.s_kCastle
+                        );
+            }
+            bb_oldIsolated = bitIsolate(bb_oldAtks);
+            bb_oldAtks &= ~bb_oldIsolated;
+        }
     }
-    vector<cMove> v_ret;
-    for (s16 j = 1; j < 7; j++) {
-        const s16 s = 6 - j;
+
+    vector<cMove> board::genPseudoLegalMoves() {
+        bitboard bb_friendlies = 0;
+        const array<reference_wrapper<bitboard>, 6>
+            a_bbs = this->playerToMove().a_bitboards;
+        for (const bitboard b : a_bbs) {
+            bb_friendlies |= b;
+        }
+        vector<cMove> v_ret;
+        this->_genPawnMoves(v_ret, bb_friendlies);
+        this->_genRookMoves(v_ret, bb_friendlies);
+        this->_genBishopMoves(v_ret, bb_friendlies);
+        this->_genKnightMoves(v_ret, bb_friendlies);
+        this->_genQueenMoves(v_ret, bb_friendlies);
+        this->_genKingMoves(v_ret, bb_friendlies);
+        return v_ret;
+    }
+
+    bool board::_isKingInCheck(const colour c) {
+        const vector<cMove> moves = this->genPseudoLegalMoves();
+        for (const cMove m : moves) {
+            if (m.p_dfd == KING && m.c_dfd == c) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    vector<cMove> _order(const vector<cMove> v_moves) {
+        array<array<vector<cMove>, 7>, 7> v_attacks;
+        // v_attacks[dfd][atk]
+        for (const cMove m : v_moves) {
+            v_attacks.at(m.p_dfd).at(m.p_atk).push_back(m);
+        }
+        vector<cMove> v_ret;
+        for (s16 j = 1; j < 7; j++) {
+            const s16 s = 6 - j;
+            for (u16 i = 0; i < 7; i++) {
+                const vector<cMove> v_tmp = v_attacks.at(s).at(i);
+                for (const cMove m : v_tmp) {
+                    v_ret.push_back(m);
+                }
+            }
+        }
         for (u16 i = 0; i < 7; i++) {
-            const vector<cMove> v_tmp = v_attacks.at(s).at(i);
+            const vector<cMove> v_tmp = v_attacks.at(6).at(i);
             for (const cMove m : v_tmp) {
                 v_ret.push_back(m);
             }
         }
+        return v_ret;
     }
-    for (u16 i = 0; i < 7; i++) {
-        const vector<cMove> v_tmp = v_attacks.at(6).at(i);
-        for (const cMove m : v_tmp) {
-            v_ret.push_back(m);
-        }
-    }
-    return v_ret;
-}
-vector<cMove> board::genLegalMoves() {
-    vector<cMove> v_ret;
-    const vector<cMove> v_pseudo = this->genPseudoLegalMoves();
-    // if i were to play the current move
-    // could the other person take my king
-    // if no then its a legal move
-    // if yes then its ilegal (skip)
-    // src = 0x1000
-    // dst = 0x200000
-    for (const cMove m : v_pseudo) {
-        this->playMove(m);
-        if (this->_isKingInCheck(!this->c_sideToMove)) {
+    vector<cMove> board::genLegalMoves() {
+        vector<cMove> v_ret;
+        const vector<cMove> v_pseudo = this->genPseudoLegalMoves();
+        // if i were to play the current move
+        // could the other person take my king
+        // if no then its a legal move
+        // if yes then its ilegal (skip)
+        // src = 0x1000
+        // dst = 0x200000
+        for (const cMove m : v_pseudo) {
+            this->playMove(m);
+            if (this->_isKingInCheck(!this->c_sideToMove)) {
+                this->unPlayMove();
+                continue;
+            }
+            v_ret.emplace_back(m);
             this->unPlayMove();
-            continue;
         }
-        v_ret.emplace_back(m);
-        this->unPlayMove();
+
+        return _order(v_ret);
     }
 
-    return _order(v_ret);
-}
-
-s64 board::_isGameOver() {
-    if (this->genLegalMoves().size() == 0) {
-        if (this->_isKingInCheck(this->c_sideToMove)) {
-            return !this->c_sideToMove;
+    s64 board::isGameOver() {
+        if (this->genLegalMoves().size() == 0) {
+            if (this->_isKingInCheck(this->c_sideToMove)) {
+                return !this->c_sideToMove;
+            }
+            // current player to move has lost
+            return STALEMATE;
         }
-        // current player to move has lost
-        return STALEMATE;
+        if (this->u_halfMoveClock == 50) return FIDDY;
+        return NOEND;
     }
-    if (this->u_halfMoveClock == 50) return FIDDY;
-    return NOEND;
-}
 
-evl board::eval() {
-    const s64 s_overResult = this->_isGameOver();
-    switch(s_overResult) {
-        case NOEND: return 
+    evl board::eval() {
+        const s64 s_overResult = this->isGameOver();
+        switch(s_overResult) {
+            case NOEND: return 
                         this->_evalMat() +
                             this->_evalPos() +
                             this->_evalMov();
-        case FIDDY:
-        case STALEMATE: return 0;
-        case white: return INT64_MAX;
-        case black: return INT64_MIN;
-    }
-    return INT64_MIN;
-}
-
-s64 board::evalInit() {
-    if (this->playerToMove().c_self == white) {
+            case FIDDY:
+            case STALEMATE: return 0;
+            case white: return INT64_MAX;
+            case black: return INT64_MIN;
+        }
         return INT64_MIN;
     }
-    return INT64_MAX;
-}
 
-namespace {
-#define SQUARES 64
-    const s64 u_wPawn = 1;
-    const s64 u_wRook = 5;
-    const s64 u_wBishop = 3;
-    const s64 u_wKnight = 3;
-    const s64 u_wKing = 99999999999999;
-    const s64 u_wQueen = 9;
-    const array<s64, 6> a_pWeights = {
-        u_wPawn,
-        u_wRook,
-        u_wBishop,
-        u_wKnight,
-        u_wKing,
-        u_wQueen,
-    };
-    const array<s64, SQUARES> a_pTable = {
-        0,  0,  0,  0,  0,  0,  0,  0,
-        50, 50, 50, 50, 50, 50, 50, 50,
-        10, 10, 20, 30, 30, 20, 10, 10,
-        5,  5, 10, 25, 25, 10,  5,  5,
-        0,  0,  0, 20, 20,  0,  0,  0,
-        5, -5,-10,  0,  0,-10, -5,  5,
-        5, 10, 10,-20,-20, 10, 10,  5,
-        0,  0,  0,  0,  0,  0,  0,  0
-    };
-    const array<s64, SQUARES> a_rTable = {
-        0,  0,  0,  0,  0,  0,  0,  0,
-        5, 10, 10, 10, 10, 10, 10,  5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        0,  0,  0,  5,  5,  0,  0,  0
-    };
-    const array<s64, SQUARES> a_bTable = {
-        -20,-10,-10,-10,-10,-10,-10,-20,
-        -10,  0,  0,  0,  0,  0,  0,-10,
-        -10,  0,  5, 10, 10,  5,  0,-10,
-        -10,  5,  5, 10, 10,  5,  5,-10,
-        -10,  0, 10, 10, 10, 10,  0,-10,
-        -10, 10, 10, 10, 10, 10, 10,-10,
-        -10,  5,  0,  0,  0,  0,  5,-10,
-        -20,-10,-10,-10,-10,-10,-10,-20,
-    };
-    const array<s64, SQUARES> a_nTable = {
-        -50,-40,-30,-30,-30,-30,-40,-50,
-        -40,-20,  0,  0,  0,  0,-20,-40,
-        -30,  0, 10, 15, 15, 10,  0,-30,
-        -30,  5, 15, 20, 20, 15,  5,-30,
-        -30,  0, 15, 20, 20, 15,  0,-30,
-        -30,  5, 10, 15, 15, 10,  5,-30,
-        -40,-20,  0,  5,  5,  0,-20,-40,
-        -50,-40,-30,-30,-30,-30,-40,-50,
-    };
-    const array<s64, SQUARES> a_kTable = {
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30,
-        -20,-30,-30,-40,-40,-30,-30,-20,
-        -10,-20,-20,-20,-20,-20,-20,-10,
-        20, 20,  0,  0,  0,  0, 20, 20,
-        20, 30, 10,  0,  0, 10, 30, 20
-    };
-    const array<s64, SQUARES> a_qTable = {
-        -20,-10,-10, -5, -5,-10,-10,-20,
-        -10,  0,  0,  0,  0,  0,  0,-10,
-        -10,  0,  5,  5,  5,  5,  0,-10,
-        -5,  0,  5,  5,  5,  5,  0, -5,
-        0,  0,  5,  5,  5,  5,  0, -5,
-        -10,  5,  5,  5,  5,  5,  0,-10,
-        -10,  0,  5,  0,  0,  0,  0,-10,
-        -20,-10,-10, -5, -5,-10,-10,-20
-    };
-
-    const array<const array<s64, SQUARES>, 6> a_tables = {
-        a_pTable,
-        a_rTable,
-        a_bTable,
-        a_nTable,
-        a_kTable,
-        a_qTable,
-    };
-}
-
-s64 board::_evalMat() const {
-    // eval white and eval black
-    s64 s_ret = 0;
-    const array<const s64, 2> a_cWeights = {1, -1};
-    for (u16 i = 0; i < 2; i++) {
-        const s64 s_cWeight = a_cWeights[i];
-        const player p = this->a_players[i].get();
-        for (u16 j = 0; j < p.a_bitboards.size(); j++) {
-            const s64 u_pop = (s64) bitPopCount(p.a_bitboards[j].get());
-            const s64 s_pWeight = a_pWeights[j];
-            s_ret += s_cWeight * u_pop * s_pWeight;
+    s64 board::evalInit() {
+        if (this->playerToMove().c_self == white) {
+            return INT64_MIN;
         }
+        return INT64_MAX;
     }
-    return s_ret * 100;
-}
 
-s64 board::_evalMov() const {
-    return 0;
-}
+    namespace {
+#define SQUARES 64
+        const s64 u_wPawn = 1;
+        const s64 u_wRook = 5;
+        const s64 u_wBishop = 3;
+        const s64 u_wKnight = 3;
+        const s64 u_wKing = 99999999999999;
+        const s64 u_wQueen = 9;
+        const array<s64, 6> a_pWeights = {
+            u_wPawn,
+            u_wRook,
+            u_wBishop,
+            u_wKnight,
+            u_wKing,
+            u_wQueen,
+        };
+        const array<s64, SQUARES> a_pTable = {
+            0,  0,  0,  0,  0,  0,  0,  0,
+            50, 50, 50, 50, 50, 50, 50, 50,
+            10, 10, 20, 30, 30, 20, 10, 10,
+            5,  5, 10, 25, 25, 10,  5,  5,
+            0,  0,  0, 20, 20,  0,  0,  0,
+            5, -5,-10,  0,  0,-10, -5,  5,
+            5, 10, 10,-20,-20, 10, 10,  5,
+            0,  0,  0,  0,  0,  0,  0,  0
+        };
+        const array<s64, SQUARES> a_rTable = {
+            0,  0,  0,  0,  0,  0,  0,  0,
+            5, 10, 10, 10, 10, 10, 10,  5,
+            -5,  0,  0,  0,  0,  0,  0, -5,
+            -5,  0,  0,  0,  0,  0,  0, -5,
+            -5,  0,  0,  0,  0,  0,  0, -5,
+            -5,  0,  0,  0,  0,  0,  0, -5,
+            -5,  0,  0,  0,  0,  0,  0, -5,
+            0,  0,  0,  5,  5,  0,  0,  0
+        };
+        const array<s64, SQUARES> a_bTable = {
+            -20,-10,-10,-10,-10,-10,-10,-20,
+            -10,  0,  0,  0,  0,  0,  0,-10,
+            -10,  0,  5, 10, 10,  5,  0,-10,
+            -10,  5,  5, 10, 10,  5,  5,-10,
+            -10,  0, 10, 10, 10, 10,  0,-10,
+            -10, 10, 10, 10, 10, 10, 10,-10,
+            -10,  5,  0,  0,  0,  0,  5,-10,
+            -20,-10,-10,-10,-10,-10,-10,-20,
+        };
+        const array<s64, SQUARES> a_nTable = {
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -30,  0, 10, 15, 15, 10,  0,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  0, 15, 20, 20, 15,  0,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -50,-40,-30,-30,-30,-30,-40,-50,
+        };
+        const array<s64, SQUARES> a_kTable = {
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -30,-40,-40,-50,-50,-40,-40,-30,
+            -20,-30,-30,-40,-40,-30,-30,-20,
+            -10,-20,-20,-20,-20,-20,-20,-10,
+            20, 20,  0,  0,  0,  0, 20, 20,
+            20, 30, 10,  0,  0, 10, 30, 20
+        };
+        const array<s64, SQUARES> a_qTable = {
+            -20,-10,-10, -5, -5,-10,-10,-20,
+            -10,  0,  0,  0,  0,  0,  0,-10,
+            -10,  0,  5,  5,  5,  5,  0,-10,
+            -5,  0,  5,  5,  5,  5,  0, -5,
+            0,  0,  5,  5,  5,  5,  0, -5,
+            -10,  5,  5,  5,  5,  5,  0,-10,
+            -10,  0,  5,  0,  0,  0,  0,-10,
+            -20,-10,-10, -5, -5,-10,-10,-20
+        };
 
-s64 board::_evalPos() const {
-    // eval white and eval black
-    s64 s_ret = 0;
-    const array<bool, 2> a_cRot = {false, true};
-    const array<s64, 2> a_cWeight = {1, -1};
-    for (u16 i = 0; i < 2; i++) {
-        const bool b_rot = a_cRot[i];
-        const player p = this->a_players[i].get();
-        for (u16 j = 0; j < p.a_bitboards.size(); j++) {
-            const array<s64, SQUARES> a_table = a_tables[j];
-            bitboard bb_cur = p.a_bitboards[j];
-            while (bb_cur) {
-                square s = bitIsolate(bb_cur);
-                bb_cur &= ~s;
-                if (b_rot) s = mirror(s);
-                const u16 u_index = square2index(s);
-                s_ret += a_cWeight[i] * a_table[u_index];
+        const array<const array<s64, SQUARES>, 6> a_tables = {
+            a_pTable,
+            a_rTable,
+            a_bTable,
+            a_nTable,
+            a_kTable,
+            a_qTable,
+        };
+    }
+
+    s64 board::_evalMat() const {
+        // eval white and eval black
+        s64 s_ret = 0;
+        const array<const s64, 2> a_cWeights = {1, -1};
+        for (u16 i = 0; i < 2; i++) {
+            const s64 s_cWeight = a_cWeights[i];
+            const player p = this->a_players[i].get();
+            for (u16 j = 0; j < p.a_bitboards.size(); j++) {
+                const s64 u_pop = (s64) bitPopCount(p.a_bitboards[j].get());
+                const s64 s_pWeight = a_pWeights[j];
+                s_ret += s_cWeight * u_pop * s_pWeight;
             }
         }
+        return s_ret * 100;
     }
-    return s_ret;
+
+    s64 board::_evalMov() {
+        const vector<cMove> v_moves = this->genLegalMoves();
+        return (100 * (v_moves.size() - 20));
+    }
+
+    s64 board::_evalPos() const {
+        // eval white and eval black
+        s64 s_ret = 0;
+        const array<bool, 2> a_cRot = {false, true};
+        const array<s64, 2> a_cWeight = {1, -1};
+        for (u16 i = 0; i < 2; i++) {
+            const bool b_rot = a_cRot[i];
+            const player p = this->a_players[i].get();
+            for (u16 j = 0; j < p.a_bitboards.size(); j++) {
+                const array<s64, SQUARES> a_table = a_tables[j];
+                bitboard bb_cur = p.a_bitboards[j];
+                while (bb_cur) {
+                    square s = bitIsolate(bb_cur);
+                    bb_cur &= ~s;
+                    if (b_rot) s = mirror(s);
+                    const u16 u_index = square2index(s);
+                    s_ret += a_cWeight[i] * a_table[u_index];
+                }
+            }
+        }
+        return s_ret;
+    }
+
+    void board::assValid() {
+        assert(bitPopCount(this->p_white.b_pawn) <= 8);
+        assert(bitPopCount(this->p_black.b_pawn) <= 8);
+        assert(bitPopCount(this->p_white.b_rook) <= 8);
+        assert(bitPopCount(this->p_black.b_rook) <= 8);
+        assert(bitPopCount(this->p_white.b_bishop) <= 8);
+        assert(bitPopCount(this->p_black.b_bishop) <= 8);
+        assert(bitPopCount(this->p_white.b_knight) <= 8);
+        assert(bitPopCount(this->p_black.b_knight) <= 8);
+        assert(bitPopCount(this->p_white.b_queen) <= 8);
+        assert(bitPopCount(this->p_black.b_queen) <= 8);
+        assert(bitPopCount(this->p_white.b_king) <= 8);
+        assert(bitPopCount(this->p_black.b_king) <= 8);
+    }
+
+    bool operator==(const bSig &a, const bSig &b) {
+        return 
+            a.p_black.b_pawn == a.p_white.b_pawn &&
+            a.c_sideToMove == b.c_sideToMove &&
+            a.p_black.b_king == a.p_white.b_king &&
+            a.p_black.b_queen == a.p_white.b_queen &&
+            a.p_black.b_rook == a.p_white.b_rook &&
+            a.p_black.b_bishop == a.p_white.b_bishop &&
+            a.p_black.b_knight == a.p_white.b_knight;
+    }
+
+    bool operator!=(const bSig &a, const bSig &b) {
+        return !(a == b);
+    }
+    
+    bSig board::sig() {
+        return {
+            .p_white = this->p_white,
+            .p_black = this->p_black,
+            .c_sideToMove = this->c_sideToMove,
+        };
+    }
+
+    square _alg2squ(const string s_in) {
+        if (
+                s_in.length() != 2 ||
+                !isalpha(s_in[0]) ||
+                !isdigit(s_in[1])
+                ) return 0;
+
+        // get col
+        const u8 u_cIndex = s_in[0] - 'a';
+        // get row
+        const u8 u_rIndex = s_in[1] - '1';
+        // do some maths
+        return 1 << (u_rIndex * 8 + u_cIndex);
+    }
+
+    colour board::_square2colour(const square s) {
+        for (const player p : {this->p_white, this->p_black}) {
+            for (u8 u = 0; u < p.a_bitboards.size(); u++) {
+                bitboard b = p.a_bitboards[u];
+                if (b & s) return p.c_self;
+            }
+        }
+        return black;
+    }
+
+    cMove board::alg2move(const string s_in) {
+        const u8 u_maxMoveLength = 4;
+        // check for validity
+        if (s_in.length() != 4) {
+            return m_empty;
+        }
+        // extract squares
+        const string s_src = s_in.substr(0, 2);
+        const string s_dst = s_in.substr(2, 4);
+        const square sq_src = _alg2squ(s_src);
+        const square sq_dst = _alg2squ(s_dst);
+        // extract colours
+        const colour c_atk = this->_square2colour(sq_src);
+        const colour c_dfd = this->_square2colour(sq_dst);
+        // pieces
+        const piece p_atk = this->_square2piece(sq_src);
+        const piece p_dfd = this->_square2piece(sq_dst);
+
+        const square sq_dfdOld = p_dfd == EMPTY ? 0 : sq_dst;
+        cMove m(
+            c_atk,
+            p_atk,
+            sq_src,
+            sq_dst,
+            c_dfd,
+            p_dfd,
+            sq_dfdOld
+        );
+
+
+        // check if the data makes sense
+        // do some checks
+        // attacking piece must not be empty
+        // if theres a defending piece the colours must be different
+        // squares must not be less than 1 or greater than 63
+        if (
+                p_atk == EMPTY ||
+                (p_dfd != EMPTY && c_dfd == c_atk) ||
+                sq_src == 0 ||
+                sq_dst == 0)
+            return m_empty;
+        return m;
+    }
 }

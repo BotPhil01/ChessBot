@@ -1,0 +1,2 @@
+execve("./bin/Tests/ChessBot", ["./bin/Tests/ChessBot"], 0x7fff3b323218 /* 36 vars */) = -1 ENOMEM (Cannot allocate memory)
++++ killed by SIGSEGV +++

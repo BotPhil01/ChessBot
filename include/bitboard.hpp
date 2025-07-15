@@ -2,7 +2,6 @@
 #include "constants.hpp"
 
 #include <memory>
-#include <vector>
 
 #pragma once
 namespace n_bbd {

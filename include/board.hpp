@@ -1,9 +1,7 @@
 #include "types.hpp"
-#include "rands.hpp"
 #include <functional>
 #include <list>
 #include <stack>
-#include <memory>
 #include <array>
 #include <vector>
 #pragma once
@@ -52,6 +50,26 @@ namespace n_brd {
                     })
         {}
 
+        player() : 
+            b_pawn(0),
+            b_rook(0),
+            b_bishop(0),
+            b_knight(0),
+            b_king(0),
+            b_queen(0),
+            c_self(0),
+            b_kCastle(0),
+            b_qCastle(0),
+            a_bitboards({
+                    ref(this->b_pawn),
+                    ref(this->b_rook),
+                    ref(this->b_bishop),
+                    ref(this->b_knight),
+                    ref(this->b_king),
+                    ref(this->b_queen)
+                    })
+        {}
+
         player(const player &p) :
             b_pawn(p.b_pawn),
             b_rook(p.b_rook),
@@ -73,6 +91,7 @@ namespace n_brd {
         {}
 
         player &operator=(const player &p) {
+            // creates a copy of it
             b_pawn = p.b_pawn;
             b_rook = p.b_rook;
             b_bishop = p.b_bishop;
@@ -93,6 +112,7 @@ namespace n_brd {
             };
             return *this;
         }
+
         player(const player &&p) :
             b_pawn(p.b_pawn),
             b_rook(p.b_rook),
@@ -119,6 +139,22 @@ namespace n_brd {
         u8 u_halfMoveClock;
         bitboard b_enPassantDst;
     }hisItem;
+
+    // specifically for 
+    typedef struct bSig {
+        player p_white;
+        player p_black;
+        n_types::colour c_sideToMove;
+    }bSig;
+
+    const bSig s_empty = {
+        .p_white = player(),
+        .p_black = player(),
+        .c_sideToMove = black,
+    };
+
+    bool operator==(const bSig &a, const bSig &b);
+    bool operator!=(const bSig &a, const bSig &b);
 
     class board {
         friend u64 zobrist(board b);
@@ -162,15 +198,15 @@ namespace n_brd {
         // magics m_magics;
 
         void _extractBitboardAndAlter(
-                unique_ptr<player> &p,
+                player &p,
                 const n_types::piece p_bbIndex,
                 const square s_old,
                 const square s_new);
-        bitboard &extractBitboard(unique_ptr<player> &p, const u8 u_bbIndex);
-        void _playAtk(unique_ptr<player> &p, const n_types::cMove &m);
-        void _playDfd(unique_ptr<player> &p, const n_types::cMove &m);
-        void _unPlayAtk(unique_ptr<player> &p, const n_types::cMove &m);
-        void _unPlayDfd(unique_ptr<player> &p, const n_types::cMove &m);
+        bitboard &extractBitboard(player &p, const u8 u_bbIndex);
+        void _playAtk(player &p, const n_types::cMove &m);
+        void _playDfd(player &p, const n_types::cMove &m);
+        void _unPlayAtk(player &p, const n_types::cMove &m);
+        void _unPlayDfd(player &p, const n_types::cMove &m);
         void _parsePP(string_view sv_pp);
         void _parseSTM(string_view sv_pp);
         void _parseCA(string_view sv_pp);
@@ -224,6 +260,16 @@ namespace n_brd {
                 const bitboard bb_friendlies);
 
         void _sethmc(const n_types::cMove m);
+        s64 _evalMat() const;
+
+        s64 _evalPos() const;
+
+        s64 _evalMov();
+
+        void _alterZob(const n_types::cMove m);
+
+        n_types::colour _square2colour(const square s);
+        public:
         /*
          * @return colour of winner if game has ended in checkmate
          * @return STALEMATE if stalemate
@@ -233,15 +279,7 @@ namespace n_brd {
 #define STALEMATE -1
 #define FIDDY -2
 #define NOEND -3
-        s64 _isGameOver();
-        s64 _evalMat() const;
-
-        s64 _evalPos() const;
-
-        s64 _evalMov() const;
-
-        void _alterZob(const n_types::cMove m);
-        public:
+        s64 isGameOver();
         // u64 u_zob = zobrist(*this);
         u64 u_zob = 0;
         board();
@@ -253,5 +291,8 @@ namespace n_brd {
         string str();
         n_types::evl eval();
         n_types::evl evalInit();
+        void assValid();
+        bSig sig();
+        n_types::cMove alg2move(const string s_in);
     };
 }
