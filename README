@@ -1,4 +1,36 @@
 # ChessBot
-This is a small project where I try to implement a chess ai in a very small amount of time.
-Its more of a passion project at the end of the day.
-This is currently in development and a release is not available.
+This is a small project where I try to implement a 
+chess ai in a very small amount of time.
+Please note that this is more of a proof of concept 
+following my previous project 4ChessBot and will 
+most likely be my last venture into AI and games.
+
+# Requirements:
+- 8gb ram
+- g++
+- Premake (included)
+
+# Features:
+- Premake build script for all platforms 
+- Bash scripts for more automated building
+- Single threaded architecture
+- Hand made testing framework
+- Fen loading support
+- Bitboard encoding of the board (LERF)
+- Negamax framework for alphabeta
+- Quiescence search w/ standing pat
+- Move ordering (MVV-LA)
+- Transposition tables with PV, CUT, ALL node cutoffs
+- Iterative deepening
+- Thread safe move timer
+- Game loop with custom algebraic move notation
+
+# Unsupported features:
+- Castling
+- True algebraic moves
+- Parallel search
+
+Realistically adding support for the unsupported 
+features would be spending time on a relatively 
+minor part of the project that I would not rather 
+spend. Thank you for checking this out!
