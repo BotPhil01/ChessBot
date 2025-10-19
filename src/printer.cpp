@@ -18,15 +18,12 @@ operation:
         } else {
             cout << 0;
         }
-separator:
         cout << ", ";
-increment:
         i++;
         mask = mask << 1;
         if (i % 8 == 0 && i != 0) {
             goto endcheck;
         }
-endline:
         cout << "\n";
         goto endcheck;
 endcheck:

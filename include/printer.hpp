@@ -1,7 +1,7 @@
 #include "types.hpp"
 #include "board.hpp"
 #include <iostream>
-#pragma oncee
+#pragma once
 namespace n_prt {
     void cprint(const char cVal);
     template<class Iterator>

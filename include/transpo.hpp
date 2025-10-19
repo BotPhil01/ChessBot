@@ -34,10 +34,13 @@ namespace n_brd {
     };
 
     u64 zobrist(n_brd::board b);
-#define _N_TABLES 2
-#define _S_QTABLE (500000 / _N_TABLES)
+// #define _N_TABLES 2
+#define _N_TABLES 1
+// #define _S_QTABLE (500000 / _N_TABLES)
+#define _S_QTABLE (1000000 / _N_TABLES)
 // #define _S_TABLE (30000000 / _N_TABLES)
-#define _S_TABLE (500000 / _N_TABLES)
+#define _S_TABLE (1 / _N_TABLES)
+// #define _S_TABLE (500000 / _N_TABLES)
 
     u64 _zob2ind(const u64 u_zob, u64 u_max) {
         return u_zob % u_max;
@@ -64,8 +67,12 @@ namespace n_brd {
             }
 
             void add(const entry e_cand) {
-                const u64 u_zob = _zob2ind(e_cand.u_hash, _S_TABLE);
-                _a_entries[u_zob] = e_cand;
+                // only want to replace if it makes sense
+                const entry e_existing = query(e_cand.u_hash);
+                if (e_existing.u_depth < e_cand.u_depth) {
+                    const u64 u_zob = _zob2ind(e_cand.u_hash, _S_TABLE);
+                    _a_entries[u_zob] = e_cand;
+                }
             }
         private:
             array<entry, _S_TABLE> _a_entries{e_empty};

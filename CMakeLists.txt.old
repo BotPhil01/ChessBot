@@ -1,0 +1,57 @@
+set(CMAKE_C_COMPILER "/usr/bin/gcc")
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+cmake_minimum_required(VERSION 3.22.1)
+add_compile_options(-O3 -Wall -Werror)
+project(ChessBot)
+
+find_package(Catch2 3 REQUIRED)
+add_executable(testsbin benchmarking/benchmark.cpp)
+
+add_library(include)
+add_library(src)
+target_sources(include
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS
+            include
+        FILES
+            include/bitboard.hpp 
+            include/constants.hpp 
+            include/printer.hpp 
+            include/search.hpp 
+            include/stack.hpp 
+            include/transpo.hpp
+            include/board.hpp 
+            include/nodectr.hpp 
+            include/rands.hpp 
+            include/sliding.hpp 
+            include/timer.hpp 
+            include/types.hpp
+)
+
+target_sources(src
+    PRIVATE
+        src/bitboard.cpp
+        src/main.cpp
+        src/printer.cpp
+        src/search.cpp
+        src/stack.cpp
+        src/transpo.cpp
+        src/board.cpp
+        src/nodectr.cpp
+        src/rands.cpp
+        src/sliding.cpp
+        src/timer.cpp
+        src/types.cpp
+)
+
+target_link_libraries(testsbin
+    PRIVATE
+        Catch2::Catch2WithMain
+        src
+    PUBLIC
+        include
+)
+
+set_property(TARGET testsbin PROPERTY CXX_STANDARD 20)
+set_target_properties(include PROPERTIES LINKER_LANGUAGE CXX)

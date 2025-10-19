@@ -270,7 +270,7 @@ namespace n_brd {
         // if this will do nothing
         // nothing happens when b == s_old && b == s_new
         assert(b != s_old || b != s_new);
-        const bitboard b_cache = b;
+        // const bitboard b_cache = b;
         // remove old
         b = b & ~s_old;
         // add new
@@ -511,7 +511,7 @@ namespace n_brd {
 
     void board::_genRookMoves(vector<cMove> &v_dst, const bitboard bb_friendlies) {
         const player &p_atk = this->playerToMove();
-        const player &p_dfd = this->playerToWatch();
+        // const player &p_dfd = this->playerToWatch();
         bitboard bb_oldAtks = p_atk.b_rook;
         bitboard bb_oldIsolated = bitIsolate(bb_oldAtks);
         bb_oldAtks = bb_oldAtks & ~bb_oldIsolated;
@@ -995,7 +995,7 @@ namespace n_brd {
     }
 
     colour board::_square2colour(const square s) {
-        for (const player p : {this->p_white, this->p_black}) {
+        for (const player &p : {this->p_white, this->p_black}) {
             for (u8 u = 0; u < p.a_bitboards.size(); u++) {
                 bitboard b = p.a_bitboards[u];
                 if (b & s) return p.c_self;
@@ -1005,7 +1005,7 @@ namespace n_brd {
     }
 
     cMove board::alg2move(const string s_in) {
-        const u8 u_maxMoveLength = 4;
+        // const u8 u_maxMoveLength = 4;
         // check for validity
         if (s_in.length() != 4) {
             return m_empty;

@@ -9,7 +9,6 @@
 namespace n_sch {
     using namespace n_brd;
     using namespace n_ctr;
-    // using namespace n_tmr;
     using namespace n_types;
     using namespace n_consts;
 
@@ -41,7 +40,7 @@ namespace n_sch {
                     return {e.e, e.m_best};
                 }
                 if (e.n == node::DELTA &&
-                        e_alpha >= INT64_MIN + e_delta &&
+                        e_alpha >= (s64) INT64_MIN + e_delta &&
                         e.e < e_alpha - e_delta) {
                     cout << "QDE\n";
                     return {e.e, e.m_best};
@@ -74,7 +73,7 @@ namespace n_sch {
             }
 
             // delta cutoff to save processing power
-            if (e_alpha >= INT64_MIN + e_delta &&
+            if (e_alpha >= (s64) INT64_MIN + e_delta &&
                     e_best < e_alpha - e_delta) {
                 au_qDelta++;
                 _e_tmp = {
@@ -159,15 +158,15 @@ namespace n_sch {
             if (e.u_hash != e_empty.u_hash && e.u_depth >= u_depth) {
                 n_ctr::au_col++;
                 if (e.n == node::PV) {
-                    // cout << "PV cutoff\n";
+                    cout << "PV cutoff\n";
                     return {e.e, e.m_best};
                 }
                 if (e.n == node::ALL && e.e <= e_alpha) {
-                    // cout << "All cutoff\n";
+                    cout << "All cutoff\n";
                     return {e.e, e.m_best};
                 }
                 if (e.n == node::CUT && e.e >= e_beta) {
-                    // cout << "Cut cutoff\n";
+                    cout << "Cut cutoff\n";
                     return {e.e, e.m_best};
                 }
             }
@@ -274,8 +273,9 @@ namespace n_sch {
             pair<evl, cMove> p_cur = {INT64_MIN, n_consts::m_empty};
             au_ctr = 0;
             uint64_t u_cum = au_ctr;
-            uint64_t u_col = au_col;
+            // uint64_t u_col = au_col;
             for (s16 i = 0; i < MAXDEPTH + 1; i++) {
+                // cout << "entering depth " << i << "\n";
                 pair<evl, cMove> e_ret = _negamax(
                         b,
                         INT64_MIN,
@@ -283,8 +283,9 @@ namespace n_sch {
                         i,
                         p_cur.second
                         );
-                // cout << "Nodes searched in it " <<
-                //     i << " " << au_ctr - u_cum << "\n";
+                // cout << "leaving depth " << i << "\n";
+                cout << "Nodes searched in it " <<
+                    i << " " << au_ctr - u_cum << "\n";
                 // cout << "Nodes collision in it " <<
                 //     i << " " << au_col - u_col << "\n";
                 // cout << "Max quiesce beta " <<
@@ -293,7 +294,7 @@ namespace n_sch {
                 //     i << " " << au_qDelta << "\n";
                 // cout << "Max quiesce depth reached " <<
                 //     i << " " << au_quiDepth  << endl;
-                u_col = au_col;
+                // u_col = au_col;
                 u_cum = au_ctr;
                 p_cur = e_ret;
             }
